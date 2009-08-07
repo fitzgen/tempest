@@ -15,13 +15,14 @@
             var messages = [{name:"nick", message:"hello world"}, {"name":"heidi", "message":"Heyyyy"}];
             messages = $.tempest("template-message", messages);
             console.log(messages);
-            $.("body").append(messages);
 
             var things = [{name:"google", type:"search engine", url:"http://google.com/"},
                           {"name":"my site", "type":"blog", "url":"http://fitzgeraldnick.com/"}]
             things = $.tempest("template-web-things", things);
             console.log(things);
-            $.("body").append(things);
+
+            $("body").append(messages);
+            $("body").append(things);
         });
         </script>
     </body>

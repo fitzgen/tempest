@@ -62,7 +62,7 @@
                 return templateCache[args[0]];
             } else if (args.length == 2 && typeof(args[0]) == "string" && typeof(args[1]) == "string") {
                 // template setter
-                templateCache[args[0]] = args[1];
+                templateCache[args[0]] = args[1].replace(/^\s+/g, "").replace(/\s+$/g, "").replace(/[\n\r]+/g, "");
                 return args[1];
             }
         },
@@ -73,7 +73,7 @@
     // Call this after $(document).ready()
     $(document).ready(function(){
         $("textarea.tempest-template").each(function(obj) {
-            templateCache[$(this).attr('id')] = $(this).val();
+            templateCache[$(this).attr('id')] = $(this).val().replace(/^\s+/g, "").replace(/\s+$/g, "").replace(/[\n\r]+/g, "");
             $(this).remove();
         });
     });
