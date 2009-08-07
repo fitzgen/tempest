@@ -1,0 +1,26 @@
+<html>
+    <body>
+
+        <textarea class="tempest-template" id="template-message">
+            <li>%(name)% - %(message)%</li>
+        </textarea>
+        <textarea class="tempest-template" id="template-web-things">
+            <li>%(name)% is a %(type)% at %(url)%</li>
+        </textarea>
+
+        <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+        <script type="text/javascript" src="jquery.tempest.js"></script>
+        <script type="text/javascript">
+        $(document).ready(function(){
+            $().tempest("__init__");
+
+            var messages = [{name:"nick", message:"hello world"}, {"name":"heidi", "message":"Heyyyy"}];
+            $.("body").append($().tempest("template-message", messages));
+
+            var things = [{name:"google", type:"search engine", url:"http://google.com/"},
+                          {"name":"my site", "type":"blog", "url":"http://fitzgeraldnick.com/"}]
+            $.("body").append($().tempest("template-web-things", things));
+        });
+        </script>
+    </body>
+</html>
