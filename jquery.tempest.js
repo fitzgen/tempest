@@ -25,23 +25,6 @@
     $.fn.tempest = function() {
             var args = arguments;
 
-            // render an object/array-of-objects to a template 
-            //     - to an existing template:
-            //       $.tempest("post", { title: "Example", "content": "foo bar" });
-            //
-            //     - to a given template:
-            //       var tmpl = "<li><a href='%(url)%'>%(title)%</a></li>";
-            //       $.tempest(tmpl, { title: "Example", "content": "foo bar" });
-            //
-            //    OR
-            //
-            // save and retrieve templates:
-            //     - getter:
-            //       $.tempest("post");
-            //
-            //     - setter:
-            //       $.tempest("post", "<li><a href='%(url)%'>%(title)%</a></li>");
-
             if (args.length == 2 && typeof(args[0]) == "string" && typeof(args[1]) == "object") {
                 // render a template. $.tempest(str, obj)
                 var template;
