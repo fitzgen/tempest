@@ -12,14 +12,16 @@
         <script type="text/javascript" src="jquery.tempest.js"></script>
         <script type="text/javascript">
         $(document).ready(function(){
-            $().tempest("__init__");
-
             var messages = [{name:"nick", message:"hello world"}, {"name":"heidi", "message":"Heyyyy"}];
-            $.("body").append($().tempest("template-message", messages));
+            messages = $.tempest("template-message", messages);
+            console.log(messages);
+            $.("body").append(messages);
 
             var things = [{name:"google", type:"search engine", url:"http://google.com/"},
                           {"name":"my site", "type":"blog", "url":"http://fitzgeraldnick.com/"}]
-            $.("body").append($().tempest("template-web-things", things));
+            things = $.tempest("template-web-things", things);
+            console.log(things);
+            $.("body").append(things);
         });
         </script>
     </body>

@@ -22,55 +22,59 @@
 // THE SOFTWARE.
 
 (function($) {
-    $.fn.tempest = function() {
+    var templateCache = {};
+    var lines = [];
+
+    $.extend({
+        tempest: function() {
+            // reset each time
+            lines = [];
             var args = arguments;
 
             if (args.length == 2 && typeof(args[0]) == "string" && typeof(args[1]) == "object") {
-                // render a template. $.tempest(str, obj)
                 var template;
                 try {
-                    template = $.fn.tempest.templateCache[args[0]];
+                    template = templateCache[args[0]];
                 } catch(error) {
                     template = args[0];
                 }
 
-                var objects = [];
-
                 var render = function(i, obj) {
+                    var rendered = template;
                     $.each(obj, function(attr, val) {
                         var regex = new RegExp("%[(]" + attr + "[)]%", "g");
-                        var rendered = template.split(regex).join(val);
-                        objects.push($(rendered));
+                        rendered = rendered.split(regex).join(val);
                     });
+                    lines.push(rendered);
                 };
 
                 // handle arrays of objects or just single objects
                 if (args[1].length !== undefined) {
-                    $.each(args[1], render(i, obj));
+                    $.each(args[1], render);
                 } else {
                     render(-1, args[1]);
                 }
 
                 // return jQuery objects
-                return objects;
-            } else if (args.length == 1 && args[0] == "__init__") {
-                // Gather all the existing templates on 
-                // the page and save them in the cache.
-                // Call this after $(document).ready()
-                (function() {
-                    $().tempest.templateCache = {};
-                    $("textarea.tempest-template").each(function(obj) {
-                        $().tempest.templateCache[$(this).attr('id')] = $(this).val();
-                        $(this).remove();
-                    });
-                })()
+                return $(lines.join(""));
             } else if (args.length == 1 && typeof(args[0]) == "string") {
                 // template getter
-                return $.fn.tempest.templateCache[args[0]];
+                return templateCache[args[0]];
             } else if (args.length == 2 && typeof(args[0]) == "string" && typeof(args[1]) == "string") {
                 // template setter
-                $.fn.tempest.templateCache[args[0]] = args[1];
+                templateCache[args[0]] = args[1];
                 return args[1];
             }
-        };
-    })(jQuery);
+        },
+    });
+
+    // Gather all the existing templates on 
+    // the page and save them in the cache.
+    // Call this after $(document).ready()
+    $(document).ready(function(){
+        $("textarea.tempest-template").each(function(obj) {
+            templateCache[$(this).attr('id')] = $(this).val();
+            $(this).remove();
+        });
+    });
+})(jQuery);
