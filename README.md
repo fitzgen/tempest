@@ -21,24 +21,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-----------------------------------------------------------------------------------
 
 API
 ===
 
 render an object/array-of-objects to a template 
-    - to an existing template:
-      $.tempest("post", { title: "Example", "content": "foo bar" });
+    // to an existing template:
+       $.tempest("post", { title: "Example", "content": "foo bar" });
 
-    - to a given template:
-      var tmpl = "<li><a href='%(url)%'>%(title)%</a></li>";
-      $.tempest(tmpl, { title: "Example", "content": "foo bar" });
+    // to a given template:
+       var tmpl = "<li><a href='%(url)%'>%(title)%</a></li>";
+       $.tempest(tmpl, { title: "Example", "content": "foo bar" });
 
    OR
 
 save and retrieve templates:
-    - getter:
-      $.tempest("post");
+    // getter:
+       $.tempest("post");
 
-    - setter:
-      $.tempest("post", "<li><a href='%(url)%'>%(title)%</a></li>");
+    // setter:
+       $.tempest("post", "<li><a href='%(url)%'>%(title)%</a></li>");
