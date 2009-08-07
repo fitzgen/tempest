@@ -1,10 +1,10 @@
 <html>
     <body>
 
-        <textarea class="tempest-template" id="template-message">
-            <li>%(name)% - %(message)%</li>
+        <textarea class="tempest-template" id="template-message" style="display:none;">
+            <li>%(name)% says "%(message)%"</li>
         </textarea>
-        <textarea class="tempest-template" id="template-web-things">
+        <textarea class="tempest-template" id="template-web-things" style="display:none;">
             <li>%(name)% is a %(type)% at %(url)%</li>
         </textarea>
 
@@ -12,18 +12,107 @@
         <script type="text/javascript" src="jquery.tempest.js"></script>
         <script type="text/javascript">
         $(document).ready(function(){
-            var messages = [{name:"nick", message:"hello world"}, {"name":"heidi", "message":"Heyyyy"}];
-            messages = $.tempest("template-message", messages);
-            console.log(messages);
 
-            var things = [{name:"google", type:"search engine", url:"http://google.com/"},
-                          {"name":"my site", "type":"blog", "url":"http://fitzgeraldnick.com/"}]
-            things = $.tempest("template-web-things", things);
-            console.log(things);
+            function testStorageFromTextarea(){
+                var templ1 = $.tempest("template-message") == "<li>%(name)% says \"%(message)%\"</li>";
+                var templ2 = $.tempest("template-web-things") == "<li>%(name)% is a %(type)% at %(url)%</li>";
+                return templ1 == true && templ2 == true;
+            }
+            fireunit.ok(testStorageFromTextarea(), "Access stored templates that were inside textareas");
 
-            $("body").append(messages);
-            $("body").append(things);
+            function testSetTemplate(){
+                var tmpl = "Hello %(variable)%";
+                return $.tempest("hello", tmpl) == tmpl;
+            }
+            fireunit.ok(testSetTemplate(), "Template setter");
+
+            function testGetTemplate(){
+                var key = "arbitrary";
+                var tmpl = "Hello %(variable)%";
+                $.tempest(key, tmpl);
+                return $.tempest(key) == tmpl;
+            }
+            fireunit.ok(testGetTemplate(), "Template getter");
+
+            function testRenderedValue(){
+                var obj = {"name":"my site", "type":"blog", "url":"http://fitzgeraldnick.com/"};
+                var rendered = $.tempest("template-web-things", obj);
+                return rendered.text() == "my site is a blog at http://fitzgeraldnick.com/";
+            }
+            fireunit.ok(testRenderedValue(), "The text of the rendered template is correct");
+
+            function testAppendSingleObject(){
+                var len = $("body ul li").length;
+                var message = {name:"nick", message:"hello world"};
+                var rendered = $.tempest("template-message", message);
+                $("body ul").append(rendered);
+                return len + 1 == $("body ul li").length;
+            }
+            fireunit.ok(testAppendSingleObject(), "Append a single rendered object to the DOM");
+
+            function testManyRenderedValue(){
+                var arr = [{name:"mom", message:"brush your teeth"},
+                           {name:"heidi", message:"why hello"},
+                           {name:"bill clinton", message:"I didn't inhale"},
+                           {name:"OJ and Brittany", message:"Oops I did it again"},];
+                var text = $.tempest("template-message", arr).text();
+
+                var expected = [];
+                for (i = 0; i < arr.length; i++){
+                    expected.push($.tempest("template-message", arr[i]).text());
+                }
+                expected = expected.join("");
+                return text == expected;
+            }
+            fireunit.ok(testManyRenderedValue(), "The text of the rendered template is correct");
+
+            function testAppendManyObjects(){
+                var len = $("body ul li").length;
+                var arr = [{name:"mom", message:"brush your teeth"},
+                           {name:"heidi", message:"why hello"},
+                           {name:"bill clinton", message:"I didn't inhale"},
+                           {name:"OJ and Brittany", message:"Oops I did it again"},];
+                var rendered = $.tempest("template-message", arr);
+                $("body ul").append(rendered);
+                return len + arr.length == $("body ul li").length;
+            }
+            fireunit.ok(testAppendManyObjects(), "Append an array of rendered objects to the DOM");
+
+            function testRenderOneTimeUseTemplate(){
+                var obj = {thing:"test", activity:"TESTS"};
+                var tmpl = "<li><em>Whoah a one time use %(thing)% for doing %(activity)%</em></li>";
+                var rendered = $.tempest(tmpl, obj);
+                return rendered.text() == "Whoah a one time use test for doing TESTS";
+            }
+            fireunit.ok(testRenderOneTimeUseTemplate(), "Render data to a one-time-use template");
+
+            function testAppendOneTimeUseTemplate(){
+                var len = $("body ul li").length;
+                var obj = {thing:"test", activity:"TESTS"};
+                var tmpl = "<li><em>Whoah a one time use %(thing)% for doing %(activity)%</em></li>";
+                var rendered = $.tempest(tmpl, obj);
+                $("body ul").append(rendered);
+                return len + 1 == $("body ul li").length;
+            }
+            fireunit.ok(testAppendOneTimeUseTemplate(), "Render data to a one-time-use template");
+
+            function testUnknownInput(){
+                try {
+                    $.tempest(3242354534534);
+                    return false;
+                } catch(error) {
+                    return error == "Unknown Input: jQuery.tempest can not handle the given arguments.";
+                }
+            }
+            fireunit.ok(testUnknownInput(), "Unknown input throws an error");
+
+            // evaluate all the tests
+            fireunit.testDone();
+
         });
         </script>
+
+        <ul>
+        </ul>
     </body>
 </html>
