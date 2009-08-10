@@ -32,6 +32,7 @@
             var args = arguments;
 
             if (args.length == 2 && typeof(args[0]) == "string" && typeof(args[1]) == "object") {
+                // determine if a key to a stored template has been passed or a one-time-use template
                 var template;
                 if (templateCache[args[0]] !== undefined) {
                     template = templateCache[args[0]];
@@ -39,8 +40,10 @@
                     template = args[0];
                 }
 
+                // do the actual rendering
                 var render = function(i, obj) {
                     var rendered = template;
+                    // fill in the values
                     $.each(obj, function(attr, val) {
                         var regex = new RegExp("%[(]" + attr + "[)]%", "g");
                         rendered = rendered.split(regex).join(val);
@@ -49,7 +52,7 @@
                 };
 
                 // handle arrays of objects or just single objects
-                if (args[1].length !== undefined) {
+                if (args[1].length !== undefined && typeof(args[1].length) == "number") {
                     $.each(args[1], render);
                 } else {
                     render(-1, args[1]);
