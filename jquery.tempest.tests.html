@@ -94,7 +94,7 @@
                 $("body ul").append(rendered);
                 return len + 1 == $("body ul li").length;
             }
-            fireunit.ok(testAppendOneTimeUseTemplate(), "Render data to a one-time-use template");
+            fireunit.ok(testAppendOneTimeUseTemplate(), "Append data from a rendered one-time-use template");
 
             function testUnknownInput(){
                 try {
@@ -108,6 +108,18 @@
 
             // evaluate all the tests
             fireunit.testDone();
+
+            // see how long it takes to render 100 templates
+            var start = new Date().getTime();
+            for (i = 0; i < 100; i++) {
+                var obj = {thing:"test"};
+                var tmpl = "<li><em>Whoah a one time use %(thing)%!</em></li>";
+                var rendered = $.tempest(tmpl, obj);
+            }
+            var end = new Date().getTime();
+            var delta = (end - start) / 1000;
+            alert("It took " + delta + " seconds to render 100 templates");
+
 
         });
         </script>
