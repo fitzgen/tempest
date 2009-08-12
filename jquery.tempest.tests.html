@@ -2,10 +2,10 @@
     <body>
 
         <textarea class="tempest-template" id="template-message" style="display:none;">
-            <li>%(name)% says "%(message)%"</li>
+            <li>{{name}} says "{{message}}"</li>
         </textarea>
         <textarea class="tempest-template" id="template-web-things" style="display:none;">
-            <li>%(name)% is a %(type)% at %(url)%</li>
+            <li>{{name}} is a {{type}} at {{url}}</li>
         </textarea>
 
         <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
@@ -14,21 +14,21 @@
         $(document).ready(function(){
 
             function testStorageFromTextarea(){
-                var templ1 = $.tempest("template-message") == "<li>%(name)% says \"%(message)%\"</li>";
-                var templ2 = $.tempest("template-web-things") == "<li>%(name)% is a %(type)% at %(url)%</li>";
+                var templ1 = $.tempest("template-message") == "<li>{{name}} says \"{{message}}\"</li>";
+                var templ2 = $.tempest("template-web-things") == "<li>{{name}} is a {{type}} at {{url}}</li>";
                 return templ1 == true && templ2 == true;
             }
             fireunit.ok(testStorageFromTextarea(), "Access stored templates that were inside textareas");
 
             function testSetTemplate(){
-                var tmpl = "Hello %(variable)%";
+                var tmpl = "Hello {{variable}}";
                 return $.tempest("hello", tmpl) == tmpl;
             }
             fireunit.ok(testSetTemplate(), "Template setter");
 
             function testGetTemplate(){
                 var key = "arbitrary";
-                var tmpl = "Hello %(variable)%";
+                var tmpl = "Hello {{variable}}";
                 $.tempest(key, tmpl);
                 return $.tempest(key) == tmpl;
             }
@@ -80,7 +80,7 @@
 
             function testRenderOneTimeUseTemplate(){
                 var obj = {thing:"test", activity:"TESTS"};
-                var tmpl = "<li><em>Whoah a one time use %(thing)% for doing %(activity)%</em></li>";
+                var tmpl = "<li><em>Whoah a one time use {{thing}} for doing {{activity}}</em></li>";
                 var rendered = $.tempest(tmpl, obj);
                 return rendered.text() == "Whoah a one time use test for doing TESTS";
             }
@@ -89,7 +89,7 @@
             function testAppendOneTimeUseTemplate(){
                 var len = $("body ul li").length;
                 var obj = {thing:"test", activity:"TESTS"};
-                var tmpl = "<li><em>Whoah a one time use %(thing)% for doing %(activity)%</em></li>";
+                var tmpl = "<li><em>Whoah a one time use {{thing}} for doing {{activity}}</em></li>";
                 var rendered = $.tempest(tmpl, obj);
                 $("body ul").append(rendered);
                 return len + 1 == $("body ul li").length;
@@ -113,7 +113,7 @@
             var start = new Date().getTime();
             for (i = 0; i < 100; i++) {
                 var obj = {thing:"test"};
-                var tmpl = "<li><em>Whoah a one time use %(thing)%!</em></li>";
+                var tmpl = "<li><em>Whoah a one time use {{thing}}!</em></li>";
                 var rendered = $.tempest(tmpl, obj);
             }
             var end = new Date().getTime();

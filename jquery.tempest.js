@@ -45,7 +45,7 @@
                     var rendered = template;
                     // fill in the values
                     $.each(obj, function(attr, val) {
-                        var regex = new RegExp("%[(]" + attr + "[)]%", "g");
+                        var regex = new RegExp("\{{2}[ ]?" + attr + "[ ]?\}{2}", "g");
                         rendered = rendered.split(regex).join(val);
                     });
                     lines.push(rendered);
