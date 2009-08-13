@@ -20,6 +20,29 @@
             }
             fireunit.ok(testStorageFromTextarea(), "Access stored templates that were inside textareas");
 
+            function testGetAllTemplatesLength(){
+                return $.tempest().length == 2;
+            }
+            fireunit.ok(testGetAllTemplatesLength(), "Length of $.tempest() is equal to number of textarea templates pre-defined");
+
+            function testGetAllTemplatesKeys(){
+                var first = $.tempest()[0];
+                var second = $.tempest()[1];
+                var first_correct = first[0] == "template-message" || first[0] == "template-web-things";
+                var second_correct = second[0] == "template-message" || second[0] == "template-web-things";
+                return first_correct && second_correct && first[0] != second[0];
+            }
+            fireunit.ok(testGetAllTemplatesKeys(), "Keys to existing templates are in $.tempest()");
+
+            function testGetAllTemplatesVals(){
+                var first = $.tempest()[0];
+                var second = $.tempest()[1];
+                var first_correct = first[1] == $.tempest("template-message") || first[1] == $.tempest("template-web-things");
+                var second_correct = second[1] == $.tempest("template-message") || second[1] == $.tempest("template-web-things");
+                return first_correct && second_correct && first[1] != second[1];
+            }
+            fireunit.ok(testGetAllTemplatesVals(), "Existing templates are in $.tempest()");
+
             function testSetTemplate(){
                 var tmpl = "Hello {{variable}}";
                 return $.tempest("hello", tmpl) == tmpl;
@@ -109,16 +132,39 @@
             // evaluate all the tests
             fireunit.testDone();
 
-            // see how long it takes to render 100 templates
-            var start = new Date().getTime();
+            // see how long it takes to render 100 templates 20 times
+            var deltas = [];
+            $("body ul:last").after("<h3>Rendering a set of 100 templates 100 times:</h3><ul></ul>");
             for (i = 0; i < 100; i++) {
-                var obj = {thing:"test"};
-                var tmpl = "<li><em>Whoah a one time use {{thing}}!</em></li>";
-                var rendered = $.tempest(tmpl, obj);
+                var start = new Date().getTime();
+                for (j = 0; j < 100; j++) {
+                    var obj = {thing:"test"};
+                    var tmpl = "<li><em>Whoah a one time use {{thing}}!</em></li>";
+                    var rendered = $.tempest(tmpl, obj);
+                }
+                var end = new Date().getTime();
+                var delta = (end - start);
+                deltas.push(delta);
+                $("body ul:last").append("<li>Set "+i+": "+delta+" ms</li>")
             }
-            var end = new Date().getTime();
-            var delta = (end - start) / 1000;
-            alert("It took " + delta + " seconds to render 100 templates");
+
+            var total = 0;
+            for (i = 0; i < deltas.length; i++) {
+                total += deltas[i];
+            }
+            var avg = total / deltas.length;
+
+            Array.prototype.max = function(){
+                return Math.max.apply( Math, this );
+            };
+            Array.prototype.min = function(){
+                return Math.min.apply( Math, this );
+            };
+            var max = deltas.max();
+            var min = deltas.min();
+            $("body ul:last").before("<p>The avg. time was "+avg+" ms</p>")
+            $("body ul:last").before("<p>The max time was "+max+" ms</p>")
+            $("body ul:last").before("<p>The min time was "+min+" ms</p>")
 
 
         });

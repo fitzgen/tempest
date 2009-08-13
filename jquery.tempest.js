@@ -31,7 +31,14 @@
             lines = [];
             var args = arguments;
 
-            if (args.length == 2 && typeof(args[0]) == "string" && typeof(args[1]) == "object") {
+            if (args.length == 0) {
+                // return an array of all the stored templates and the key to access each of them
+                var cache = [];
+                $.each(templateCache, function(key, val) {
+                    cache.push([ key, val ]);
+                });
+                return cache;
+            } else if (args.length == 2 && typeof(args[0]) == "string" && typeof(args[1]) == "object") {
                 // determine if a key to a stored template has been passed or a one-time-use template
                 var template;
                 if (templateCache[args[0]] !== undefined) {
