@@ -1,8 +1,9 @@
 Tempest jQuery Templating Plugin
 ================================
 
-Copyright (c) 2009 Nick Fitzgerald - http://fitzgeraldnick.com/
-Read the LICENSE for more info.
+Copyright (c) 2009 Nick Fitzgerald
+MIT Licensed - Read the LICENSE for more info.
+http://fitzgeraldnick.com/
 
 API
 ===
@@ -33,7 +34,7 @@ Then you could access that template just as you would access any other template 
     $.tempest("new-post");
     // returns string: "<li class='new'><a href='{{url}}'>{{title}}</a></li>"
 
-Note: $.tempest will remove the <textarea> after stroing the contents in the template cache.
+Note: $.tempest will remove the textarea after stroing the contents in the template cache.
 
 Rendering objects to templates
 ------------------------------
