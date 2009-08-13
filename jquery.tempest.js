@@ -26,7 +26,7 @@
     var lines = [];
 
     $.extend({
-        tempest: function() {
+        tempest: function () {
             // reset each time
             lines = [];
             var args = arguments;
@@ -84,9 +84,12 @@
     // Gather all the existing templates on 
     // the page and save them in the cache.
     // Call this after $(document).ready()
-    $(document).ready(function(){
+    $(document).ready(function (){
         $("textarea.tempest-template").each(function(obj) {
-            templateCache[$(this).attr('id')] = $(this).val().replace(/^\s+/g, "").replace(/\s+$/g, "").replace(/[\n\r]+/g, "");
+            templateCache[$(this).attr('title')] = $(this).val()
+					         	  .replace(/^\s+/g, "")
+                                                          .replace(/\s+$/g, "")
+                                                          .replace(/[\n\r]+/g, "");
             $(this).remove();
         });
     });
