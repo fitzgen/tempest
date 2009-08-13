@@ -10,11 +10,13 @@ API
 saving templates to the $.tempest object
 ----------------------------------------
 
-    // setter:
+Setter:
+
     $.tempest("post", "<li><a href='{{url}}'>{{title}}</a></li>");
     // returns string: "<li><a href='{{url}}'>{{title}}</a></li>"
 
-    // getter:
+Getter:
+
     $.tempest("post");
     // returns string: "<li><a href='{{url}}'>{{title}}</a></li>"
 
@@ -32,18 +34,21 @@ note: these textareas are removed from the DOM after storing the template
 Rendering objects to templates
 ------------------------------
 
-    // render an object to an existing template:
+Render an object to an existing template:
+
     $.tempest("post", { title: "My Blog", url: "http://fitzgeraldnick.com/weblog/" });
     // returns jQuery: [ <li><a href='http://fitzgeraldnick.com/weblog/'>My Blog</a></li> ]
 
-    // render an array of objects to an existing template
+Render an array of objects to an existing template
+
     var arr = [{ title: "My Blog", url: "http://fitzgeraldnick.com/weblog/" },
                { title: "Google", url: "http://google.com/" },
                { title: "Hacker News", url: "http://news.ycombinator.com/" }];
     $.tempest("post", arr);
     // returns jQuery: [ <li>, <li>, <li> ]
 
-    // render an object (or array of objects) to a one-time-use template:
+Render an object (or array of objects) to a one-time-use template:
+
     var tmpl = "<span>{{title}}: {{content}}</span>";
     $.tempest(tmpl, { title: "Example", "content": "Hello World!" });
     // returns jQuery: [ <span>Example: Hello World!</span> ]
