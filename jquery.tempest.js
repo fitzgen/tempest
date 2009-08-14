@@ -25,6 +25,11 @@
     var templateCache = {};
     var lines = [];
 
+    // hack to get the HTML of a jquery object as a string
+    var JQtoString = function (jq) {
+        return $(document.createElement("div")).append(jq).html();
+    }
+
     $.extend({
         tempest: function () {
             // reset each time
@@ -53,7 +58,13 @@
                     // fill in the values
                     $.each(obj, function(attr, val) {
                         var regex = new RegExp("\{{2}[ ]?" + attr + "[ ]?\}{2}", "g");
-                        rendered = rendered.split(regex).join(val);
+                        if (val instanceof $) {
+                            rendered = rendered.split(regex).join(JQtoString(val));
+                        } else {
+                            rendered = rendered.split(regex).join(val);
+                        }
+                        // TODO: if something is an object test for a toHTML function, use that if it exists, but if it returns jquery, handle it
+                        // also, using dot notation to access object attribute and properties
                     });
                     lines.push(rendered);
                 };

@@ -129,6 +129,16 @@
             }
             fireunit.ok(testUnknownInput(), "Unknown input throws an error");
 
+            function testRenderJQuery() {
+                var jq = "<div>jQuery object</div>";
+                var rendered = $.tempest("template-message", {
+                    name: "nick",
+                    message: $(jq),
+                });
+                return rendered.html() == 'nick says "'+jq+'"';
+            }
+            fireunit.ok(testRenderJQuery(), "Render jQuery objects with their HTML");
+
             // evaluate all the tests
             fireunit.testDone();
 
