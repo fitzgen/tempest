@@ -22,83 +22,125 @@
 // THE SOFTWARE.
 
 (function($) {
-    var templateCache = {};
-    var lines = [];
+    // PRIVATE VARS AND FUNCTIONS
+    var templateCache = {},
 
-    // hack to get the HTML of a jquery object as a string
-    var JQtoString = function (jq) {
-        return $(document.createElement("div")).append(jq).html();
-    }
+        // hack to get the HTML of a jquery object as a string
+        JQtoString = function (jq) {
+            return $(document.createElement("div")).append(jq).html();
+        },
+
+        // return an array of all the stored templates and the key to 
+        // access each of them
+        storedTemplates = function () {
+            var cache = [];
+            $.each(templateCache, function(key, val) {
+                cache.push([ key, val ]);
+            });
+            return cache;
+        },
+
+        // determine if the string is a key to a stored template or a 
+        // one-time-use template
+        chooseTemplate = function (str) {
+            if (templateCache[str] !== undefined) {
+                return templateCache[str];
+            } else {
+                return str;
+            }
+        },
+
+        // return true if an object is an array
+        isArray = function (objToTest) {
+            return Object.prototype.toString.apply(objToTest) === "[object Array]";
+        },
+
+        // call a rendering function on arrays of objects or just single 
+        // object seemlessly
+        renderToString = function (data, f) {
+            if (isArray(data)) {
+                return $.each(data, f);
+            } else {
+                return f(0, data);
+            }
+        },
+
+        // return the template rendered with the given object(s) as jQuery
+        renderToJQ = function (str, objects) {
+            var template = chooseTemplate(str),
+                lines = [];
+
+            renderToString(objects, function(i, obj) {
+                var rendered = template;
+                $.each(obj, function(attr, val) {
+                    var regex = new RegExp("\{{2}[ ]?" + 
+                                           attr + 
+                                           "[ ]?\}{2}", "g");
+                    if (val instanceof $) {
+                        // special case for jQuery objects
+                        rendered = rendered.split(regex)
+                                           .join(JQtoString(val));
+                    } else {
+                        rendered = rendered.split(regex).join(val);
+                    }
+                    // TODO: if something is an object test for a toHTML 
+                    // function, use that if it exists, but if it returns 
+                    // jquery, handle it also, using dot notation to access 
+                    // object attribute and properties
+                });
+                lines.push(rendered);
+            });
+
+            // return jQuery objects
+            return $(lines.join(""));
+        };
 
     $.extend({
         tempest: function () {
-            // reset each time
-            lines = [];
             var args = arguments;
 
-            if (args.length == 0) {
-                // return an array of all the stored templates and the key to access each of them
-                var cache = [];
-                $.each(templateCache, function(key, val) {
-                    cache.push([ key, val ]);
-                });
-                return cache;
-            } else if (args.length == 2 && typeof(args[0]) == "string" && typeof(args[1]) == "object") {
-                // determine if a key to a stored template has been passed or a one-time-use template
-                var template;
-                if (templateCache[args[0]] !== undefined) {
-                    template = templateCache[args[0]];
-                } else {
-                    template = args[0];
-                }
+            if (args.length === 0) {
 
-                // do the actual rendering
-                var render = function(i, obj) {
-                    var rendered = template;
-                    // fill in the values
-                    $.each(obj, function(attr, val) {
-                        var regex = new RegExp("\{{2}[ ]?" + attr + "[ ]?\}{2}", "g");
-                        if (val instanceof $) {
-                            rendered = rendered.split(regex).join(JQtoString(val));
-                        } else {
-                            rendered = rendered.split(regex).join(val);
-                        }
-                        // TODO: if something is an object test for a toHTML function, use that if it exists, but if it returns jquery, handle it
-                        // also, using dot notation to access object attribute and properties
-                    });
-                    lines.push(rendered);
-                };
+                return storedTemplates();
 
-                // handle arrays of objects or just single objects
-                if (args[1].length !== undefined && typeof(args[1].length) == "number") {
-                    $.each(args[1], render);
-                } else {
-                    render(-1, args[1]);
-                }
+            } else if (args.length === 2 && 
+                       typeof(args[0]) === "string" && 
+                       typeof(args[1]) === "object") {
 
-                // return jQuery objects
-                return $(lines.join(""));
-            } else if (args.length == 1 && typeof(args[0]) == "string") {
+                return renderToJQ(args[0], args[1]);
+
+            } else if (args.length === 1 && typeof(args[0]) === "string") {
+
                 // template getter
                 return templateCache[args[0]];
-            } else if (args.length == 2 && typeof(args[0]) == "string" && typeof(args[1]) == "string") {
+
+            } else if (args.length === 2 && 
+                       typeof(args[0]) === "string" && 
+                       typeof(args[1]) === "string") {
+
                 // template setter
-                templateCache[args[0]] = args[1].replace(/^\s+/g, "").replace(/\s+$/g, "").replace(/[\n\r]+/g, "");
+                templateCache[args[0]] = args[1].replace(/^\s+/g, "")
+                                                .replace(/\s+$/g, "")
+                                                .replace(/[\n\r]+/g, "");
                 return templateCache[args[0]];
+
             } else {
+
                 // raise an exception becuase no use case matched the arguments
-                throw("Unknown Input: jQuery.tempest can not handle the given arguments.");
+                throw({
+                    name: "Input Error",
+                    message: "jQuery.tempest can't handle the given arguments.",
+                });
+
             }
         },
     });
 
-    // Gather all the existing templates on 
-    // the page and save them in the cache.
-    // Call this after $(document).ready()
+    // Gather all the existing templates on the page and save them in the cache.
     $(document).ready(function (){
         $("textarea.tempest-template").each(function(obj) {
             templateCache[$(this).attr('title')] = $(this).val()
-					         	  .replace(/^\s+/g, "")
+                                                          .replace(/^\s+/g, "")
                                                           .replace(/\s+$/g, "")
                                                           .replace(/[\n\r]+/g, "");
             $(this).remove();
