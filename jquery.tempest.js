@@ -21,12 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-(function($) {
+"use strict";
+(function ($) {
     // PRIVATE VARS AND FUNCTIONS
     var templateCache = {},
 
         // hack to get the HTML of a jquery object as a string
-        JQtoString = function (jq) {
+        jQueryToString = function (jq) {
             return $(document.createElement("div")).append(jq).html();
         },
 
@@ -34,7 +35,7 @@
         // access each of them
         storedTemplates = function () {
             var cache = [];
-            $.each(templateCache, function(key, val) {
+            $.each(templateCache, function (key, val) {
                 cache.push([ key, val ]);
             });
             return cache;
@@ -70,16 +71,16 @@
             var template = chooseTemplate(str),
                 lines = [];
 
-            renderToString(objects, function(i, obj) {
+            renderToString(objects, function (i, obj) {
                 var rendered = template;
-                $.each(obj, function(attr, val) {
+                $.each(obj, function (attr, val) {
                     var regex = new RegExp("\{{2}[ ]?" + 
                                            attr + 
                                            "[ ]?\}{2}", "g");
                     if (val instanceof $) {
                         // special case for jQuery objects
                         rendered = rendered.split(regex)
-                                           .join(JQtoString(val));
+                                           .join(jQueryToString(val));
                     } else {
                         rendered = rendered.split(regex).join(val);
                     }
@@ -127,18 +128,18 @@
             } else {
 
                 // raise an exception becuase no use case matched the arguments
-                throw({
+                throw ({
                     name: "Input Error",
-                    message: "jQuery.tempest can't handle the given arguments.",
+                    message: "jQuery.tempest can't handle the given arguments."
                 });
 
             }
-        },
+        }
     });
 
     // Gather all the existing templates on the page and save them in the cache.
-    $(document).ready(function (){
-        $("textarea.tempest-template").each(function(obj) {
+    $(document).ready(function () {
+        $("textarea.tempest-template").each(function (obj) {
             templateCache[$(this).attr('title')] = $(this).val()
                                                           .replace(/^\s+/g, "")
                                                           .replace(/\s+$/g, "")
@@ -146,4 +147,4 @@
             $(this).remove();
         });
     });
-})(jQuery);
+}(jQuery));
