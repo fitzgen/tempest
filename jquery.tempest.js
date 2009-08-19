@@ -58,11 +58,26 @@
 
         // call a rendering function on arrays of objects or just single 
         // object seemlessly
-        renderToString = function (data, f) {
+        renderEach = function (data, f) {
             if (isArray(data)) {
                 return $.each(data, f);
             } else {
                 return f(0, data);
+            }
+        },
+
+        // Clean the passed value the best we can
+        cleanVal = function (val) {
+            if (val instanceof $) {
+                return jQueryToString(val);
+            } else if (!isArray(val) && typeof(val) === "[object Object]") {
+                if (typeof(val.toHTML) === "function") {
+                    return cleanVal(val.toHTML());
+                } else {
+                    return val.toString();
+                }
+            } else {
+                return val;
             }
         },
 
@@ -71,31 +86,24 @@
             var template = chooseTemplate(str),
                 lines = [];
 
-            renderToString(objects, function (i, obj) {
-                var rendered = template;
-                $.each(obj, function (attr, val) {
-                    var regex = new RegExp("\{{2}[ ]?" + 
-                                           attr + 
-                                           "[ ]?\}{2}", "g");
-                    if (val instanceof $) {
-                        // special case for jQuery objects
-                        rendered = rendered.split(regex)
-                                           .join(jQueryToString(val));
-                    } else {
-                        rendered = rendered.split(regex).join(val);
+            // TODO:  using dot notation to access 
+            // object attribute and properties
+            renderEach(objects, function (i, obj) {
+                lines.push(template.replace(/\{\{[ ]?[\w\-\.]+?[ ]?\}\}/g,
+                    function (match) {
+                        var attr = match.replace(/\{\{[ ]?/, "")
+                                        .replace(/[ ]?\}\}/, ""),
+                            val = obj[attr] || "";
+                        return cleanVal(val);
                     }
-                    // TODO: if something is an object test for a toHTML 
-                    // function, use that if it exists, but if it returns 
-                    // jquery, handle it also, using dot notation to access 
-                    // object attribute and properties
-                });
-                lines.push(rendered);
+                ));
             });
 
             // return jQuery objects
             return $(lines.join(""));
         };
 
+    // EXTEND JQUERY OBJECT
     $.extend({
         tempest: function () {
             var args = arguments;
@@ -137,7 +145,7 @@
         }
     });
 
-    // Gather all the existing templates on the page and save them in the cache.
+    // GET ALL TEXTAREA TEMPLATES ON READY
     $(document).ready(function () {
         $("textarea.tempest-template").each(function (obj) {
             templateCache[$(this).attr('title')] = $(this).val()

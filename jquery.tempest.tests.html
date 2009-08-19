@@ -139,8 +139,19 @@
             }
             fireunit.ok(testRenderJQuery(), "Render jQuery objects with their HTML");
 
+            function testEmptyObjRendersEmptyStr() {
+                var tmpl = "<p>{{ non-existent }}</p>";
+                var obj = {};
+                return $.tempest(tmpl, obj).text() === "";
+            }
+            fireunit.ok(testEmptyObjRendersEmptyStr(), "If a template's variable is not passed, default that variable to \"\"");
+
             // evaluate all the tests
             fireunit.testDone();
+
+
+
+            // speed monitoring ========================================================================
 
             // see how long it takes to render 100 templates 20 times
             var deltas = [];
@@ -158,12 +169,25 @@
                 $("body ul:last").append("<li>Set "+i+": "+delta+" ms</li>")
             }
 
+            // avg (mean)
             var total = 0;
             for (i = 0; i < deltas.length; i++) {
                 total += deltas[i];
             }
             var avg = total / deltas.length;
 
+            // std deviation
+            var diffs = [];
+            for (i = 0; i < deltas.length; i++) {
+                diffs[i] = (deltas[i] - avg) * (deltas[i] - avg);
+            }
+            var stdDevTotal = 0;
+            for (i = 0; i < diffs.length; i++) {
+                stdDevTotal += diffs[i];
+            }
+            var stdDev = Math.sqrt(stdDevTotal / diffs.length);
+
+            // max/min
             Array.prototype.max = function(){
                 return Math.max.apply( Math, this );
             };
@@ -172,7 +196,9 @@
             };
             var max = deltas.max();
             var min = deltas.min();
+
             $("body ul:last").before("<p>The avg. time was "+avg+" ms</p>")
+            $("body ul:last").before("<p>The standard deviation was "+stdDev+" ms</p>")
             $("body ul:last").before("<p>The max time was "+max+" ms</p>")
             $("body ul:last").before("<p>The min time was "+min+" ms</p>")
 
