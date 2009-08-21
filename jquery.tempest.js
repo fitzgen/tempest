@@ -89,7 +89,6 @@
             var path = str.split("."),
                 val = obj[path[0]];
                 i;
-                alert(path);
             for (i = 1; i < path.length; i++) {
                 // filter for undefined values
                 if (val !== undefined) {
