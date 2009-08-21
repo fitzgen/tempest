@@ -83,19 +83,41 @@
             }
         },
 
+        // traverse a path of an obj from a string representation, 
+        // ie "object.child.attr"
+        getValFromObj = function (str, obj) {
+            var path = str.split("."),
+                val = obj[path[0]];
+                i;
+                alert(path);
+            for (i = 1; i < path.length; i++) {
+                // filter for undefined values
+                if (val !== undefined) {
+                    val = val[path[i]];
+                } else {
+                    return "";
+                }
+            }
+
+            // make sure the last peice did not end up undefined
+            val = val || "";
+            return cleanVal(val);
+        },
+
         // return the template rendered with the given object(s) as jQuery
         renderToJQ = function (str, objects) {
             var template = chooseTemplate(str),
                 lines = [];
 
-            // TODO:  using dot notation to access 
-            // object attribute and properties
             renderEach(objects, function (i, obj) {
                 lines.push(template.replace(/\{\{[ ]?[\w\-\.]+?[ ]?\}\}/g,
                     function (match) {
                         var attr = match.replace(/\{\{[ ]?/, "")
                                         .replace(/[ ]?\}\}/, ""),
                             val = obj[attr] || "";
+                        if (val === "" && attr.search(/\./) !== -1) {
+                            return getValFromObj(attr, obj);
+                        }
                         return cleanVal(val);
                     }
                 ));

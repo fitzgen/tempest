@@ -146,6 +146,16 @@
             }
             fireunit.ok(testEmptyObjRendersEmptyStr(), "If a template's variable is not passed, default that variable to \"\"");
 
+            function testAccessObjectAttrs() {
+                var obj = {
+                    obj: { name:"object", type: { attr: "attribute" } }
+                };
+                var tmpl = "<p>{{ obj.name }} {{ obj.type.attr }}</p>";
+                var rendered = $.tempest(tmpl, obj);
+                return rendered.text() === "object attribute";
+            }
+            fireunit.ok(testAccessObjectAttrs(), "Access a passed object's attributes");
+
             // evaluate all the tests
             fireunit.testDone();
 
