@@ -53,7 +53,9 @@
 
         // return true if an object is an array
         isArray = function (objToTest) {
-            return Object.prototype.toString.apply(objToTest) === "[object Array]";
+            return Object.prototype
+                         .toString
+                         .apply(objToTest) === "[object Array]";
         },
 
         // call a rendering function on arrays of objects or just single 
