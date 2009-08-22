@@ -1,0 +1,15 @@
+GIST:
+
+- <textarea> templates are stored with the title attribute as their key, rather than the id. I realized I was prepending "template-" on to all of the id's to avoid a namespace collision and it was making the code more verbose. (This is backwards incompatible, but it is a really easy fix)
+
+- Tempest understands how to parse {{ obj.child.attribute }} now.
+
+- If there is a {{ var }} in the template that doesn't get passed to tempest for some reason, it is rendered as a blank string, rather than leaving the templating code in the rendered version
+
+- If {{ thing }} is a jQuery object, it will be properly rendered
+
+- If {{ thing }} is any other object, Tempest will first see if it has a "toHTML()" method, and will call it if it does, otherwise it defaults to "toString()" (which is what JavaScript uses to coerce an object to a string so it is always there, unfortunately, unless you override it manually you will always end up with "[object Object]")
+
+- Calling $.tempest() without any given args will get you back an array of all the key/template pairs that Tempest has stored right now
+
+- I refactored the replacement code a bit and the tests seem to be a little quicker. The tests render a set of 100 templates, 100 times, and the average time to render 100 templates on my machine (with firefox) seems to have dropped about 10 milliseconds. Woooooo hahaha, yeah no one will notice.
