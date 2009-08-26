@@ -103,4 +103,4 @@ Access an object's attributes with the dot notation:
         }
 
     });
-    // returns jQuery: [ <p>My name is <em>Nick Fitzgerald</em></p> ]</code></pre>
+    // returns jQuery: [ <p>My name is <em>Nick Fitzgerald</em></p> ]
