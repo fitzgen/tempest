@@ -21,7 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// JSLint
+/*jslint white: true, onevar: true, browser: true, undef: true, nomen: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
 "use strict";
+
 (function ($) {
     // PRIVATE VARS AND FUNCTIONS
     var templateCache = {},
@@ -87,7 +90,7 @@
         // ie "object.child.attr"
         getValFromObj = function (str, obj) {
             var path = str.split("."),
-                val = obj[path[0]];
+                val = obj[path[0]],
                 i;
             for (i = 1; i < path.length; i++) {
                 // filter for undefined values
