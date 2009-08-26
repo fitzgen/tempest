@@ -1,0 +1,101 @@
+<h1>Tempest jQuery Templating Plugin</h1>
+
+<p>Copyright (c) 2009 Nick Fitzgerald - http://fitzgeraldnick.com/ - MIT licensed</p>
+
+<p>Note: All releases are minified, to get the latest development version grab a clone from http://github.com/fitzgen/tempest/tree/master</p>
+
+<h1>PHILOSOPHY</h1>
+
+<p>I was not satisfied with the other templating plugins available, so I wrote my own. This templating system is very simple and enforces the seperation of form and function, or HTML and JS. This provides a great abstraction layer so that you can write a template ad then promptly remove the mental overhead of rendering js objects to HTML. </p>
+
+<p>Other templating languages just build and execute function blocks with strings. Any type of js logic you could want is included and evaluated. For some people, this may be the freedom that they want. </p>
+
+<p>On the other hand, Tempest will only fill in values and iterate over arrays for you. This forces you to remove any programming logic from the templates and separate form from function. This type of templating philosophy can also be seen in the Django templating language.</p>
+
+<p>The other big thing, for me, is that iteration is handled seamlessly. Just pass an array of objects to tempest instead of a single object and it will return a jquery element array. </p>
+
+<!--break-->
+
+<h1>API</h1>
+
+<p>Note: The API is for the most current release only, there may be slight differences in older releases.</p>
+
+<h2>Saving & retrieving templates to and from $.tempest</h2>
+
+<p>Setter:</p>
+
+<pre><code>$.tempest("post", "<li><a href='{{url}}'>{{title}}</a></li>");
+// returns string: "<li><a href='{{url}}'>{{title}}</a></li>"
+</code></pre>
+
+<p>Getter:</p>
+
+<pre><code>$.tempest("post");
+// returns string: "<li><a href='{{url}}'>{{title}}</a></li>"
+</code></pre>
+
+
+<p>$.tempest will also find all textareas with the class "tempest-template" and save them with their "title" attribute as the key they are indexed by once the $(document).ready() event fires.</p>
+
+<p>For example, assuming this is in the html when $(document).ready() fires:</p>
+
+<pre><code><textarea title="new-post" class="tempest-template" style="display:none">
+    <li class='new'><a href='{{url}}'>{{title}}</a></li>
+    </textarea>
+    </code></pre>
+
+<p>Then you could access that template just as you would access any other template that you manually created:</p>
+
+<pre><code>$.tempest("new-post");
+// returns string: "<li class='new'><a href='{{url}}'>{{title}}</a></li>"
+</code></pre>
+
+<p>Note: $.tempest will remove the textarea from the DOM after storing the contents in the template cache.</p>
+
+<p>Get all templates Tempest has stored by passing no arguments:</p>
+
+<pre><code>$.tempest();
+// returns [ [ "post", "<li><a href='{{url}}'>{{title}}</a></li>" ], [ "new-post", "<li class='new'><a href='{{url}}'>{{title}}</a></li>" ] ]</code></pre>
+
+<h2>Rendering objects to templates</h2>
+
+<p>Render an object to an existing template:</p>
+
+<pre><code>$.tempest("post", { 
+        title: "My Blog",
+            url: "http://fitzgeraldnick.com/weblog/",
+});
+// returns jQuery: [ <li><a href='http://fitzgeraldnick.com/weblog/'>My Blog</a></li> ]
+</code></pre>
+
+<p>Render an array of objects to an existing template</p>
+
+<pre><code>var arr = [{ title: "My Blog", url: "http://fitzgeraldnick.com/weblog/" },
+           { title: "Google", url: "http://google.com/" },
+                      { title: "Hacker News", url: "http://news.ycombinator.com/" }];
+                      $.tempest("post", arr);
+                      // returns jQuery: [ <li>, <li>, <li> ]
+                      </code></pre>
+
+<p>Render an object (or array of objects) to a one-time-use template:</p>
+
+<pre><code>var one-time-template = "<span>{{title}}: {{content}}</span>";
+$.tempest(one-time-template, {
+        "title": "Example", 
+            "content": "Hello World!",
+});
+// returns jQuery: [ <span>Example: Hello World!</span> ]
+</code></pre>
+
+<h2>Misc.</h2>
+
+<p>Access an object's attributes with the dot notation:</p>
+
+<pre><code>var one-time-template = "<p>My name is <em>{{ me.full_name }}</em></p>";
+$.tempest(one-time-template, {
+        "me": {
+                    "full_name": "Nick Fitzgerald"
+                        }
+
+});
+// returns jQuery: [ <p>My name is <em>Nick Fitzgerald</em></p> ]</code></pre>
