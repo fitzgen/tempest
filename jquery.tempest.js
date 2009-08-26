@@ -103,12 +103,40 @@
             return cleanVal(val);
         },
 
+        // base text node
+        textNode = {
+            text.text: "",
+            render: function () {
+                return self.text;
+            }
+        },
+
+        // base if node
+        ifNode = {
+            nodes: [],
+            condition: false,
+            render: function () {
+                var rendered_nodes = [],
+                    nodes = self.nodes;
+                if (self.condition) {
+                    $.each(nodes, function (i, node) {
+                        rendered_nodes.push(node.render());
+                    });
+                    return rendered_nodes.join("");
+                }
+                return "";
+            }
+        },
+
         // return the template rendered with the given object(s) as jQuery
         renderToJQ = function (str, objects) {
             var template = chooseTemplate(str),
                 lines = [];
 
             renderEach(objects, function (i, obj) {
+                // ...
+                // break template in to nodes and handle bool logic here
+                // ...
                 lines.push(template.replace(/\{\{[ ]?[\w\-\.]+?[ ]?\}\}/g,
                     function (match) {
                         var attr = match.replace(/\{\{[ ]?/, "")
