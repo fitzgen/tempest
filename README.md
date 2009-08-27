@@ -61,7 +61,7 @@ Render an object (or array of objects) to a one-time-use template:
 PHILOSOPHY
 ==========
 
-I was not satisifed with the other templating plugins available, so I wrote my own. This templating system is very simple and enforces the seperation of form and function, or HTML and JS. This provides a great abstraction layer so that you can write a template ad then promptly remove the mental overhead of rendering js objects to HTML. 
+I was not satisifed with the other templating plugins available, so I wrote my own. This templating system is very simple and enforces the seperation of form and function, or HTML and JS. This provides a great abstraction layer so that you can write a template and then promptly remove the mental overhead of rendering js objects to HTML. 
  
 Other templating languages just build and execute function blocks with strings. Any type of js logic you could want is included and evaluated. For some people, this may be the freedom that they want. 
  
