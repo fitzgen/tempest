@@ -21,7 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// JSLint
+/*jslint white: true, onevar: true, browser: true, undef: true, nomen: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
 "use strict";
+
 (function ($) {
     // PRIVATE VARS AND FUNCTIONS
     var templateCache = {},
@@ -87,7 +90,7 @@
         // ie "object.child.attr"
         getValFromObj = function (str, obj) {
             var path = str.split("."),
-                val = obj[path[0]];
+                val = obj[path[0]],
                 i;
             for (i = 1; i < path.length; i++) {
                 // filter for undefined values
@@ -106,7 +109,8 @@
         // return the template rendered with the given object(s) as jQuery
         renderToJQ = function (str, objects) {
             var template = chooseTemplate(str),
-                lines = [];
+                lines = [],
+                joined;
 
             renderEach(objects, function (i, obj) {
                 lines.push(template.replace(/\{\{[ ]?[\w\-\.]+?[ ]?\}\}/g,
@@ -122,8 +126,14 @@
                 ));
             });
 
-            // return jQuery objects
-            return $(lines.join(""));
+            joined = lines.join("");
+            if (joined.search(/<[a-zA-Z]+>/) === 0) {
+                // return jQuery objects
+                return $(lines.join(""));
+            } else {
+                // return string
+                return joined;
+            }
         };
 
     // EXTEND JQUERY OBJECT

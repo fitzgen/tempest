@@ -1,15 +1,35 @@
-GIST:
+===============================================================================
+Tempest jQuery Templating Plugin 0.2
+===============================================================================
 
-- <textarea> templates are stored with the title attribute as their key, rather than the id. I realized I was prepending "template-" on to all of the id's to avoid a namespace collision and it was making the code more verbose. (This is backwards incompatible, but it is a really easy fix)
+Backwards incompatibilities
+-------------------------------------------------------------------------------
 
-- Tempest understands how to parse {{ obj.child.attribute }} now.
+* <textarea> templates are indexed by the "title" attribute as their key, 
+  rather than the "id" attribute. I realized I was prepending "template-" on to 
+  all of the id's to avoid a namespace collision and it was making the code 
+  more verbose. I value brevity in my code.
 
-- If there is a {{ var }} in the template that doesn't get passed to tempest for some reason, it is rendered as a blank string, rather than leaving the templating code in the rendered version
+New features
+-------------------------------------------------------------------------------
 
-- If {{ thing }} is a jQuery object, it will be properly rendered
+* Access objects' children and attributes with the dot notation. So 
+  "{{ obj.child.attr }}" is completely legit.
 
-- If {{ thing }} is any other object, Tempest will first see if it has a "toHTML()" method, and will call it if it does, otherwise it defaults to "toString()" (which is what JavaScript uses to coerce an object to a string so it is always there, unfortunately, unless you override it manually you will always end up with "[object Object]")
+* If "{{ object }}" is any object besides a jQuery instance (see the bug fixes 
+  below), Tempest will try calling a "toHTML()" method if it exists. If not, it 
+  will default to the "toString()" method.
 
-- Calling $.tempest() without any given args will get you back an array of all the key/template pairs that Tempest has stored right now
+* Calling "$.tempest()" without any parameters will return an array of all the 
+  key/template pairs that Tempest has stored right now
 
-- I refactored the replacement code a bit and the tests seem to be a little quicker. The tests render a set of 100 templates, 100 times, and the average time to render 100 templates on my machine (with firefox) seems to have dropped about 10 milliseconds. Woooooo hahaha, yeah no one will notice.
+Bug fixes
+--------------------------------------------------------------------------------
+
+* If "{{ non-existent }}" is included in the template but "non-existent" is
+  not passed to Tempest, "{{ non-existent }}" is rendered as an empty string.
+  Before this fix, the template tag would have been left in the rendered
+  version.
+
+* If "{{ thing }}" is a jQuery object, it will be properly rendered, rather
+  than calling "toString()" on the object.
