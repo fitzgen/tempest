@@ -135,39 +135,45 @@
 
         // base if node model
         baseIfNode = {
-            nodes: [],
+            subNodes: [],
             condition: false,
             render: function (context) {
                 var rendered_nodes = [],
-                    subNodes = this.nodes;
+                    subNodes = this.subNodes;
                 if (this.condition) {
                     $.each(subNodes, function (i, node) {
                         rendered_nodes.push(node.render(context));
                     });
-                    return rendered_nodes.join("");
-                } else {
-                    return "";
-                }
+                } 
+                return rendered_nodes.join("");
             }
         },
 
-        makeNodes = function (templ, context) {
-            var tokens = templ.split(/(\{\{[ ]*?[\w\-\.]+?[ ]*?\}\}|\{%[ ]*?if[ ]+?[\w\-\.]+?[ ]*?%\}|\{%[ ]*?endif[ ]*?%\})/g),
-                nodes = [],
+        tokenize = function (templ) {
+            return templ.split(/(\{\{[ ]*?[\w\-\.]+?[ ]*?\}\}|\{%[ ]*?if[ ]+?[\w\-\.]+?[ ]*?%\}|\{%[ ]*?endif[ ]*?%\})/g);
+        },
+
+        makeNodes = function (tokens, context) {
+            var nodes = [],
                 node,
                 i = 0,
                 j = 0,
                 nestLevel = 0;
-                subNodes = [];
+                subTokens = [];
 
             while (i < tokens.length) {
                 token = tokens[i];
 
                 if (token.search(/^\{\{/) !== -1) {
+
+                    // make a var node
                     node = makeObj(baseVarNode);
                     node.name = token.replace(/\{\{[ ]*?/, "")
                                      .replace(/[ ]*?\}\}/, "");
+
                 } else if (token.search(/^\{%[ ]*?if/) !== -1) {
+
+                    // make an if node
                     node = makeObj(baseIfNode);
 
                     // determine whether an ifNode's condition is "truthy"
@@ -188,8 +194,10 @@
                     // remove the subNodes from the tokens array otherwise
                     nestLevel++;
                     while (nestLevel > 0) {
-                        // test for a missing closing block
                         if (tokens[i + 1] === undefined) {
+                            // The loop has iterated through all of the tokens 
+                            // and never found a match for a closing if tag. 
+                            // Throw an error.
                             throw ({
                                 name: "TemplateSyntaxError",
                                 message: "An 'if' tag has not been closed properly."
@@ -197,20 +205,26 @@
                         } else {
                             if (tokens[i + 1].search(/\{%[ ]*?endif[ ]*?%\}/) !== -1) {
                                 nestLevel--;
+                                // make sure that {% endif %} tokens aren't rendered as
+                                // text nodes
+                                tokens[i + 1] = "";
                             } else if (tokens[i + 1].search(/^\{%[ ]*?if/) !== -1) {
                                 nestLevel++;
                             }
-                            subNodes.push(tokens.splice(i + 1, 1));
+                            subTokens.push(tokens.splice(i + 1, 1));
                         }
                     }
 
                     if (node.condition) {
-                        // TODO: joining just to split again is a waste...
-                        node.subNodes = makeNodes(subNodes.join(""), context);
+                        node.subNodes = makeNodes(subTokens, context);
                     }
+
                 } else {
+
+                    // if it doesn't match any of the other tags, assume it is a text node
                     node = makeObj(baseTextNode);
                     node.text = token;
+
                 }
 
                 nodes.push(node);
@@ -227,7 +241,7 @@
 
             renderEach(objects, function (i, obj) {
                 var nodes;
-                nodes = makeNodes(template, obj);
+                nodes = makeNodes(tokenize(template), obj);
                 $.each(nodes, function(i, node) {
                     lines.push(node.render(obj));
                 });
