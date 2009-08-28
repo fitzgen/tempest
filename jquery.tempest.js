@@ -34,6 +34,13 @@
             return $(document.createElement("div")).append(jq).html();
         },
 
+        // make a new copy of a given object psuedo class style heritage.
+        makeObj = function (obj) {
+            var o = {};
+            o.prototype = obj;
+            return o;
+        },
+
         // return an array of all the stored templates and the key to 
         // access each of them
         storedTemplates = function () {
@@ -106,28 +113,108 @@
             return cleanVal(val);
         },
 
-        // base text node
-        textNode = {
-            text.text: "",
-            render: function () {
+        // base text node model
+        baseTextNode = {
+            text: "",
+            render: function (context) {
                 return self.text;
             }
         },
 
-        // base if node
-        ifNode = {
+        // base variable node model
+        baseVarNode = {
+            name: "",
+            render: function (context) {
+                var val = context[this.name] || "";
+                if (val === "" && attr.search(/\./) !== -1) {
+                    return getValFromObj(attr, context);
+                }
+                return cleanVal(val);
+            }
+        },
+
+        // base if node model
+        baseIfNode = {
             nodes: [],
             condition: false,
-            render: function () {
+            render: function (context) {
                 var rendered_nodes = [],
-                    nodes = self.nodes;
-                if (self.condition) {
-                    $.each(nodes, function (i, node) {
-                        rendered_nodes.push(node.render());
+                    subNodes = this.nodes;
+                if (this.condition) {
+                    $.each(subNodes, function (i, node) {
+                        rendered_nodes.push(node.render(context));
                     });
                     return rendered_nodes.join("");
+                } else {
+                    return "";
                 }
-                return "";
+            }
+        },
+
+        makeNodes = function (templ, context) {
+            var tokens = templ.split(/(\{\{[ ]*?[\w\-\.]+?[ ]*?\}\}|\{%[ ]*?if[ ]+?[\w\-\.]+?[ ]*?%\}|\{%[ ]*?endif[ ]*?%\})/g),
+                nodes = [],
+                node,
+                i = 0,
+                j = 0,
+                nestLevel = 0;
+                subNodes = [];
+
+            while (i < tokens.length) {
+                token = tokens[i];
+
+                if (token.search(/^\{\{/) !== -1) {
+                    node = makeObj(baseVarNode);
+                    node.name = token.replace(/\{\{[ ]*?/, "")
+                                     .replace(/[ ]*?\}\}/, "");
+                } else if (token.search(/^\{%[ ]*?if/) !== -1) {
+                    node = makeObj(baseIfNode);
+
+                    // determine whether an ifNode's condition is "truthy"
+                    node.condition = (function (token) {
+                        var name = token.replace(/^\{%[ ]*?if[ ]*?/, "")
+                                        .replace(/\[ ]*?%\}$/, ""),
+                            val = context[name] || "";
+                        if (val === "" && name.search(/\./) !== -1) {
+                            val = getValFromObj(name, context);
+                        } else {
+                            val = cleanVal(val);
+                        }
+                        // boolean coercion
+                        return !!val;
+                    }(token));
+
+                    // gather the ifNode's subNodes (if condition is truthy) or 
+                    // remove the subNodes from the tokens array otherwise
+                    nestLevel++;
+                    while (nestLevel > 0) {
+                        // test for a missing closing block
+                        if (tokens[i + 1] === undefined) {
+                            throw ({
+                                name: "TemplateSyntaxError",
+                                message: "An 'if' tag has not been closed properly."
+                            })
+                        } else {
+                            if (tokens[i + 1].search(/\{%[ ]*?endif[ ]*?%\}/) !== -1) {
+                                nestLevel--;
+                            } else if (tokens[i + 1].search(/^\{%[ ]*?if/) !== -1) {
+                                nestLevel++;
+                            }
+                            subNodes.push(tokens.splice(i + 1, 1));
+                        }
+                    }
+
+                    if (node.condition) {
+                        // TODO: joining just to split again is a waste...
+                        node.subNodes = makeNodes(subNodes.join(""), context);
+                    }
+                } else {
+                    node = makeObj(baseTextNode);
+                    node.text = token;
+                }
+
+                nodes.push(node);
+                i++;
             }
         },
 
@@ -137,20 +224,11 @@
                 lines = [];
 
             renderEach(objects, function (i, obj) {
-                // ...
-                // break template in to nodes and handle bool logic here
-                // ...
-                lines.push(template.replace(/\{\{[ ]?[\w\-\.]+?[ ]?\}\}/g,
-                    function (match) {
-                        var attr = match.replace(/\{\{[ ]?/, "")
-                                        .replace(/[ ]?\}\}/, ""),
-                            val = obj[attr] || "";
-                        if (val === "" && attr.search(/\./) !== -1) {
-                            return getValFromObj(attr, obj);
-                        }
-                        return cleanVal(val);
-                    }
-                ));
+                var nodes;
+                nodes = makeNodes(template, obj);
+                $.each(nodes, function(i, node) {
+                    lines.push(node.render(obj));
+                });
             });
 
             // return jQuery objects
