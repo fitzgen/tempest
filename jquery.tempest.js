@@ -38,7 +38,7 @@
         makeObj = function (obj) {
             var O = function () {};
             O.prototype = obj;
-            return new O;
+            return new O();
         },
 
         // return an array of all the stored templates and the key to 
@@ -157,8 +157,8 @@
             var nodes = [],
                 node,
                 i = 0,
-                j = 0,
-                nestLevel = 0;
+                nestLevel = 0,
+                token,
                 subTokens = [];
 
             while (i < tokens.length) {
@@ -179,7 +179,7 @@
                     // determine whether an ifNode's condition is "truthy"
                     node.condition = (function (token) {
                         var name = token.replace(/^\{%[ ]*?if[ ]*?/, "")
-                                        .replace(/\[ ]*?%\}$/, ""),
+                                        .replace(/[ ]*?%\}$/, ""),
                             val = context[name] || "";
                         if (val === "" && name.search(/\./) !== -1) {
                             val = getValFromObj(name, context);
@@ -242,7 +242,7 @@
             renderEach(objects, function (i, obj) {
                 var nodes;
                 nodes = makeNodes(tokenize(template), obj);
-                $.each(nodes, function(i, node) {
+                $.each(nodes, function (i, node) {
                     lines.push(node.render(obj));
                 });
             });
