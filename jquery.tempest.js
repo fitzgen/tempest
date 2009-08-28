@@ -36,9 +36,9 @@
 
         // make a new copy of a given object psuedo class style heritage.
         makeObj = function (obj) {
-            var o = {};
-            o.prototype = obj;
-            return o;
+            var O = function () {};
+            O.prototype = obj;
+            return new O;
         },
 
         // return an array of all the stored templates and the key to 
@@ -117,7 +117,7 @@
         baseTextNode = {
             text: "",
             render: function (context) {
-                return self.text;
+                return this.text;
             }
         },
 
@@ -126,8 +126,8 @@
             name: "",
             render: function (context) {
                 var val = context[this.name] || "";
-                if (val === "" && attr.search(/\./) !== -1) {
-                    return getValFromObj(attr, context);
+                if (val === "" && this.name.search(/\./) !== -1) {
+                    return getValFromObj(this.name, context);
                 }
                 return cleanVal(val);
             }
@@ -193,7 +193,7 @@
                             throw ({
                                 name: "TemplateSyntaxError",
                                 message: "An 'if' tag has not been closed properly."
-                            })
+                            });
                         } else {
                             if (tokens[i + 1].search(/\{%[ ]*?endif[ ]*?%\}/) !== -1) {
                                 nestLevel--;
@@ -216,6 +216,8 @@
                 nodes.push(node);
                 i++;
             }
+
+            return nodes;
         },
 
         // return the template rendered with the given object(s) as jQuery
