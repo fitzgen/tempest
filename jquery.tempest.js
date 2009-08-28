@@ -28,6 +28,16 @@
 (function ($) {
     // PRIVATE VARS AND FUNCTIONS
     var templateCache = {},
+        
+        // TAG REGULAR EXPRESSIONS
+        // Overwrite these if you want, but don't blame me when stuff goes wrong.
+        OPEN_VAR_TAG = /\{\{[ ]*?/g,
+        CLOSE_VAR_TAG = /[ ]*?\}\}/g,
+        VAR_TAG = new RegExp(OPEN_VAR_TAG.source+"[\\w\\-\\.]"+CLOSE_VAR_TAG.source, "g"),
+        OPEN_BLOCK_TAG = /\{%[ ]*?/g,
+        CLOSE_BLOCK_TAG = /[ ]*?%\}/g,
+        OPEN_IF_TAG = new RegExp(OPEN_BLOCK_TAG.source+"if[ ]+?[\\w\\-\\.]+?"+CLOSE_BLOCK_TAG.source, "g"),
+        END_IF_TAG = new RegExp(OPEN_BLOCK_TAG.source+"endif"+CLOSE_BLOCK_TAG.source, "g"),
 
         // hack to get the HTML of a jquery object as a string
         jQueryToString = function (jq) {
@@ -150,7 +160,7 @@
         },
 
         tokenize = function (templ) {
-            return templ.split(/(\{\{[ ]*?[\w\-\.]+?[ ]*?\}\}|\{%[ ]*?if[ ]+?[\w\-\.]+?[ ]*?%\}|\{%[ ]*?endif[ ]*?%\})/g);
+            return templ.split(new Regexp("("+VAR_TAG.source+"|"+OPEN_IF_TAG.source+"|"+END_IF_TAG.source+")"));
         },
 
         makeNodes = function (tokens, context) {
@@ -164,14 +174,14 @@
             while (i < tokens.length) {
                 token = tokens[i];
 
-                if (token.search(/^\{\{/) !== -1) {
+                if (VAR_TAG.test(token)) {
 
                     // make a var node
                     node = makeObj(baseVarNode);
                     node.name = token.replace(/\{\{[ ]*?/, "")
                                      .replace(/[ ]*?\}\}/, "");
 
-                } else if (token.search(/^\{%[ ]*?if/) !== -1) {
+                } else if (OPEN_IF_TAG.test(token)) {
 
                     // make an if node
                     node = makeObj(baseIfNode);
