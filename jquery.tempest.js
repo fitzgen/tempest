@@ -33,105 +33,75 @@
         // Overwrite these if you want, but don't blame me when stuff goes wrong.
         OPEN_VAR_TAG = /\{\{[ ]*?/g,
         CLOSE_VAR_TAG = /[ ]*?\}\}/g,
-        VAR_TAG = new RegExp(OPEN_VAR_TAG.source+"[\\w\\-\\.]"+CLOSE_VAR_TAG.source, "g"),
         OPEN_BLOCK_TAG = /\{%[ ]*?/g,
         CLOSE_BLOCK_TAG = /[ ]*?%\}/g,
-        OPEN_IF_TAG = new RegExp(OPEN_BLOCK_TAG.source+"if[ ]+?[\\w\\-\\.]+?"+CLOSE_BLOCK_TAG.source, "g"),
-        END_IF_TAG = new RegExp(OPEN_BLOCK_TAG.source+"endif"+CLOSE_BLOCK_TAG.source, "g"),
 
-        // hack to get the HTML of a jquery object as a string
-        jQueryToString = function (jq) {
-            return $(document.createElement("div")).append(jq).html();
+        // Probably, you don't want to mess with these, as they are built from 
+        // the ones above.
+        VAR_TAG = new RegExp(OPEN_VAR_TAG.source + 
+            "[\\w\\-\\.] + " + 
+            CLOSE_VAR_TAG.source, "g"),
+        BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source + 
+            "[\\w]+?[ ]+?[\\w\\-\\.]*?" + 
+            CLOSE_BLOCK_TAG.source, "g"),
+        END_BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source + 
+            "end[\\w]*?" + 
+            CLOSE_BLOCK_TAG.source, "g"),
+
+        // A few quick functions for testing what type of tag a token is with 
+        // the regexs.
+        isBlockTag = function (token) {
+            return BLOCK_TAG.test(token);
+        },
+        isEndTag = function (token) {
+            return END_BLOCK_TAG.test(token);
+        },
+        isVarTag = function (token) {
+            return VAR_TAG.test(token);
         },
 
-        // make a new copy of a given object psuedo class style heritage.
-        makeObj = function (obj) {
-            var O = function () {};
-            O.prototype = obj;
-            return new O();
-        },
+        // All block tags stored in here. Tags have a couple things to work 
+        // with:
+        //
+        // * "args" property is set before render: 
+        //     - Example: {% tag_type arg1 arg2 foo bar %}
+        //         * The "args" property would be set to 
+        //               ["arg1", "arg2", "foo", "bar"] 
+        //           in this example. The tag's render method could look them 
+        //           up in the context object, or could do whatever it wanted 
+        //           to do with it.
+        // * "subNodes" property which is an array of all the nodes between 
+        //   the block tag and it's corresponding {% end... %} tag
+        //     - NOTE: This property is only set for a block if it has the 
+        //       "expectsEndTag" property set to true.
+        // * Every block tag should have a "render" method that takes one 
+        //   argument: a context object. It should return a string.
+        BLOCK_NODES = {
+            "if": {
+                expectsEndTag: true,
+                render: function (context) {
+                    var rendered_nodes = [],
+                        subNodes = this.subNodes;
 
-        // return an array of all the stored templates and the key to 
-        // access each of them
-        storedTemplates = function () {
-            var cache = [];
-            $.each(templateCache, function (key, val) {
-                cache.push([ key, val ]);
-            });
-            return cache;
-        },
-
-        // determine if the string is a key to a stored template or a 
-        // one-time-use template
-        chooseTemplate = function (str) {
-            if (templateCache[str] !== undefined) {
-                return templateCache[str];
-            } else {
-                return str;
-            }
-        },
-
-        // return true if an object is an array
-        isArray = function (objToTest) {
-            return Object.prototype
-                         .toString
-                         .apply(objToTest) === "[object Array]";
-        },
-
-        // call a rendering function on arrays of objects or just single 
-        // object seemlessly
-        renderEach = function (data, f) {
-            if (isArray(data)) {
-                return $.each(data, f);
-            } else {
-                return f(0, data);
-            }
-        },
-
-        // Clean the passed value the best we can
-        cleanVal = function (val) {
-            if (val instanceof $) {
-                return jQueryToString(val);
-            } else if (!isArray(val) && typeof(val) === "[object Object]") {
-                if (typeof(val.toHTML) === "function") {
-                    return cleanVal(val.toHTML());
-                } else {
-                    return val.toString();
-                }
-            } else {
-                return val;
-            }
-        },
-
-        // traverse a path of an obj from a string representation, 
-        // ie "object.child.attr"
-        getValFromObj = function (str, obj) {
-            var path = str.split("."),
-                val = obj[path[0]],
-                i;
-            for (i = 1; i < path.length; i++) {
-                // filter for undefined values
-                if (val !== undefined) {
-                    val = val[path[i]];
-                } else {
-                    return "";
+                    // Check the truthiness of the argument.
+                    if (!!this.args[0]) {
+                        $.each(subNodes, function (i, node) {
+                            rendered_nodes.push(node.render(context));
+                        });
+                    } 
+                    return rendered_nodes.join("");
                 }
             }
-
-            // make sure the last peice did not end up undefined
-            val = val || "";
-            return cleanVal(val);
         },
 
-        // base text node model
+        // Base text node object for prototyping.
         baseTextNode = {
-            text: "",
             render: function (context) {
-                return this.text;
+                return this.text || "";
             }
         },
 
-        // base variable node model
+        // Base variable node object for prototyping.
         baseVarNode = {
             name: "",
             render: function (context) {
@@ -143,121 +113,222 @@
             }
         },
 
-        // base if node model
-        baseIfNode = {
-            subNodes: [],
-            condition: false,
-            render: function (context) {
-                var rendered_nodes = [],
-                    subNodes = this.subNodes;
-                if (this.condition) {
-                    $.each(subNodes, function (i, node) {
-                        rendered_nodes.push(node.render(context));
-                    });
-                } 
-                return rendered_nodes.join("");
+        // Hack to get the HTML of a jquery object as a string.
+        jQueryToString = function (jq) {
+            return $(document.createElement("div")).append(jq).html();
+        },
+
+        // Make a new copy of a given object with psuedo class style heritage.
+        makeObj = function (obj) {
+            if (obj === undefined) {
+                return obj;
+            }
+            var O = function () {};
+            O.prototype = obj;
+            return new O();
+        },
+
+        // Return an array of key/template pairs.
+        storedTemplates = function () {
+            var cache = [];
+            $.each(templateCache, function (key, templ) {
+                cache.push([ key, templ ]);
+            });
+            return cache;
+        },
+
+        // Determine if the string is a key to a stored template or a 
+        // one-time-use template.
+        chooseTemplate = function (str) {
+            if (templateCache[str] !== undefined) {
+                return templateCache[str];
+            } else {
+                return str;
             }
         },
 
-        tokenize = function (templ) {
-            return templ.split(new Regexp("("+VAR_TAG.source+"|"+OPEN_IF_TAG.source+"|"+END_IF_TAG.source+")"));
+        // Return true if (and only if) an object is an array.
+        isArray = function (objToTest) {
+            return Object.prototype
+                         .toString
+                         .apply(objToTest) === "[object Array]";
         },
 
-        makeNodes = function (tokens, context) {
-            var nodes = [],
-                node,
-                i = 0,
-                nestLevel = 0,
-                token,
-                subTokens = [];
+        // Call a rendering function on arrays of objects or just a single 
+        // object seamlessly.
+        renderEach = function (data, f) {
+            if (isArray(data)) {
+                return $.each(data, f);
+            } else {
+                return f(0, data);
+            }
+        },
 
-            while (i < tokens.length) {
-                token = tokens[i];
-
-                if (VAR_TAG.test(token)) {
-
-                    // make a var node
-                    node = makeObj(baseVarNode);
-                    node.name = token.replace(/\{\{[ ]*?/, "")
-                                     .replace(/[ ]*?\}\}/, "");
-
-                } else if (OPEN_IF_TAG.test(token)) {
-
-                    // make an if node
-                    node = makeObj(baseIfNode);
-
-                    // determine whether an ifNode's condition is "truthy"
-                    node.condition = (function (token) {
-                        var name = token.replace(/^\{%[ ]*?if[ ]*?/, "")
-                                        .replace(/[ ]*?%\}$/, ""),
-                            val = context[name] || "";
-                        if (val === "" && name.search(/\./) !== -1) {
-                            val = getValFromObj(name, context);
-                        } else {
-                            val = cleanVal(val);
-                        }
-                        // boolean coercion
-                        return !!val;
-                    }(token));
-
-                    // gather the ifNode's subNodes (if condition is truthy) or 
-                    // remove the subNodes from the tokens array otherwise
-                    nestLevel++;
-                    while (nestLevel > 0) {
-                        if (tokens[i + 1] === undefined) {
-                            // The loop has iterated through all of the tokens 
-                            // and never found a match for a closing if tag. 
-                            // Throw an error.
-                            throw ({
-                                name: "TemplateSyntaxError",
-                                message: "An 'if' tag has not been closed properly."
-                            });
-                        } else {
-                            if (tokens[i + 1].search(/\{%[ ]*?endif[ ]*?%\}/) !== -1) {
-                                nestLevel--;
-                                // make sure that {% endif %} tokens aren't rendered as
-                                // text nodes
-                                tokens[i + 1] = "";
-                            } else if (tokens[i + 1].search(/^\{%[ ]*?if/) !== -1) {
-                                nestLevel++;
-                            }
-                            subTokens.push(tokens.splice(i + 1, 1));
-                        }
-                    }
-
-                    if (node.condition) {
-                        node.subNodes = makeNodes(subTokens, context);
-                    }
-
+        // Clean the passed value the best we can.
+        cleanVal = function (val) {
+            if (val instanceof $) {
+                return jQueryToString(val);
+            } else if (!isArray(val) && typeof(val) === "object") { 
+                if (typeof(val.toHTML) === "function") {
+                    return cleanVal(val.toHTML());
                 } else {
-
-                    // if it doesn't match any of the other tags, assume it is a text node
-                    node = makeObj(baseTextNode);
-                    node.text = token;
-
+                    return val.toString();
                 }
-
-                nodes.push(node);
-                i++;
+            } else {
+                return val;
             }
-
-            return nodes;
         },
 
-        // return the template rendered with the given object(s) as jQuery
+        // Traverse a path of an obj from a string representation, 
+        // for example "object.child.attr".
+        getValFromObj = function (str, obj) {
+            var path = str.split("."),
+                val = obj[path[0]],
+                i;
+            for (i = 1; i < path.length; i++) {
+                // Return an empty string if the lookup ever hits undefined.
+                if (val !== undefined) {
+                    val = val[path[i]];
+                } else {
+                    return "";
+                }
+            }
+
+            // Make sure the last piece did not end up undefined.
+            val = val || "";
+            return cleanVal(val);
+        },
+
+        // Split a template in to tokens which will eventually be converted to 
+        // nodes and then rendered.
+        tokenize = function (templ) {
+            return templ.split(new RegExp("(" + VAR_TAG.source + "|" + 
+                                          OPEN_IF_TAG.source + "|" + 
+                                          END_IF_TAG.source + ")"));
+        },
+
+        // "Lisp in C's clothing." - Douglas Crockford I believe.
+        cdr = function (arr) {
+            return arr.slice(1);
+        },
+
+        // Array.push changes the original array in place and returns the new 
+        // length of the array rather than the the actual array itself. This 
+        // makes it unchainable, which is ridiculous.
+        append = function (item, list) {
+            return list.concat([item]);
+        },
+
+        // Take a token and create a variable node from it.
+        makeVarNode = function (token) {
+            var node = makeObj(baseVarNode);
+            node.name = token.replace(OPEN_VAR_TAG, "")
+                             .replace(CLOSE_VAR_TAG, "");
+            return node;
+        },
+
+        // Take a token and create a text node from it.
+        makeTextNode = function (token) {
+            var node = makeObj(baseTextNode);
+            node.text = token;
+            return node;
+        },
+
+        // Create a block tag's node by hijacking the "makeNodes" function 
+        // until an end-block is found.
+        makeBlockNode = function (nodes, tokens, f) {
+            // Remove the templating syntax and split the type of block tag and
+            // its arguments.
+            var bits = tokens[0].replace(OPEN_BLOCK_TAG, "")
+                                .replace(CLOSE_BLOCK_TAG, "")
+                                .split(/[ ]+?/),
+
+                // The type of block tag is the first of the bits, the rest 
+                // (if present) are args
+                type = bits[0],
+                args = cdr(bits),
+
+                // Make the node from the set of block tags that Tempest knows 
+                // about.
+                node = makeObj(BLOCK_NODES[type]),
+                resultsArray;
+
+            // Ensure that the type of block tag is one that is defined in 
+            // BLOCK_NODES
+            if (node === undefined) {
+                throw ({
+                    name: "TemplateSyntaxError",
+                    message: "Unkown Block Tag."
+                });
+            }
+
+            node.args = args;
+
+            if (node.expectsEndTag === true) {
+                resultsArray = makeNodes(tokens);
+                if (resultsArray[2] !== undefined) {
+                    // The third item in the array returned by makeNodes is 
+                    // only defined if the last of the tokens was made in to a 
+                    // node and it wasn't an end-block tag.
+                    throw ({
+                        name: "TemplateSyntaxError",
+                        message: "A block tag was expecting an ending tag but it was not found."
+                    });
+                }
+                node.subNodes = resultsArray[0];
+                tokens = resultsArray[1];
+            }
+
+            // Continue where we were before the block node.
+            return f(append(node, nodes), cdr(tokens));
+        },
+
+        // A recursive function that terminates either when all tokens have 
+        // been converted to nodes or an end-block tag is found.
+        makeNodes = function (tokens) {
+            return (function (nodes, tokens) {
+                var token = tokens[0];
+                return tokens.length === 0 ?
+                           [nodes, [], true] : 
+                       isEndTag(token) ? 
+                           [nodes, cdr(tokens)] :
+                       isVarTag(token) ? 
+                           arguments.callee(append(makeVarNode(token), nodes), cdr(tokens)) :
+                       isBlockTag(token) ? 
+                           makeBlockNode(nodes, tokens, arguments.callee) :
+                       // else
+                           arguments.callee(append(makeTextNode(token), nodes), cdr(tokens));
+                       
+            }([], tokens));
+        }
+
+        // Return the template rendered with the given object(s) as a jQuery 
+        // object.
         renderToJQ = function (str, objects) {
             var template = chooseTemplate(str),
                 lines = [];
 
             renderEach(objects, function (i, obj) {
-                var nodes;
-                nodes = makeNodes(tokenize(template), obj);
+                var resultsArray = makeNodes(tokenize(template), obj),
+                    nodes = resultsArray[0];
+
+                // Check for tokens left over in the results array, this means 
+                // that not all tokens were rendered because there are more 
+                // end-block tagss than block tags that expect an end.
+                if (resultsArray[1].length !== 0) {
+                    throw ({
+                        name: "TemplateSyntaxError",
+                        message: "An unexpected end tag was found."
+                    });
+                }
+
+                // Render each node and push it to the lines.
                 $.each(nodes, function (i, node) {
                     lines.push(node.render(obj));
                 });
             });
 
-            // return jQuery objects
+            // Return the joined templates as jQuery objects
             return $(lines.join(""));
         };
 
@@ -268,24 +339,26 @@
 
             if (args.length === 0) {
 
+                // Return key/template pairs of all stored templates.
                 return storedTemplates();
 
             } else if (args.length === 2 && 
                        typeof(args[0]) === "string" && 
                        typeof(args[1]) === "object") {
 
+                // Render an object or objects to a template.
                 return renderToJQ(args[0], args[1]);
 
             } else if (args.length === 1 && typeof(args[0]) === "string") {
 
-                // template getter
+                // Template getter.
                 return templateCache[args[0]];
 
             } else if (args.length === 2 && 
                        typeof(args[0]) === "string" && 
                        typeof(args[1]) === "string") {
 
-                // template setter
+                // Template setter.
                 templateCache[args[0]] = args[1].replace(/^\s+/g, "")
                                                 .replace(/\s+$/g, "")
                                                 .replace(/[\n\r]+/g, "");
@@ -293,9 +366,9 @@
 
             } else {
 
-                // raise an exception becuase no use case matched the arguments
+                // Raise an exception because the arguments did not match the API.
                 throw ({
-                    name: "Input Error",
+                    name: "InputError",
                     message: "jQuery.tempest can't handle the given arguments."
                 });
 

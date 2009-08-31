@@ -13,6 +13,8 @@
         <script type="text/javascript">
         $(document).ready(function(){
 
+            // TODO: write a test for the "toHTML" method look up.
+
             function testStorageFromTextarea(){
                 var templ1 = $.tempest("template-message") == "<li>{{name}} says \"{{message}}\"</li>";
                 var templ2 = $.tempest("template-web-things") == "<li>{{name}} is a {{type}} at {{url}}</li>";
