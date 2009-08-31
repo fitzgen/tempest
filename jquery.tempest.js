@@ -101,6 +101,41 @@
             }
         },
 
+        // Clean the passed value the best we can.
+        cleanVal = function (val) {
+            if (val instanceof $) {
+                return jQueryToString(val);
+            } else if (!isArray(val) && typeof(val) === "object") { 
+                if (typeof(val.toHTML) === "function") {
+                    return cleanVal(val.toHTML());
+                } else {
+                    return val.toString();
+                }
+            } else {
+                return val;
+            }
+        },
+
+        // Traverse a path of an obj from a string representation, 
+        // for example "object.child.attr".
+        getValFromObj = function (str, obj) {
+            var path = str.split("."),
+                val = obj[path[0]],
+                i;
+            for (i = 1; i < path.length; i++) {
+                // Return an empty string if the lookup ever hits undefined.
+                if (val !== undefined) {
+                    val = val[path[i]];
+                } else {
+                    return "";
+                }
+            }
+
+            // Make sure the last piece did not end up undefined.
+            val = val || "";
+            return cleanVal(val);
+        },
+
         // Base variable node object for prototyping.
         baseVarNode = {
             name: "",
@@ -164,47 +199,12 @@
             }
         },
 
-        // Clean the passed value the best we can.
-        cleanVal = function (val) {
-            if (val instanceof $) {
-                return jQueryToString(val);
-            } else if (!isArray(val) && typeof(val) === "object") { 
-                if (typeof(val.toHTML) === "function") {
-                    return cleanVal(val.toHTML());
-                } else {
-                    return val.toString();
-                }
-            } else {
-                return val;
-            }
-        },
-
-        // Traverse a path of an obj from a string representation, 
-        // for example "object.child.attr".
-        getValFromObj = function (str, obj) {
-            var path = str.split("."),
-                val = obj[path[0]],
-                i;
-            for (i = 1; i < path.length; i++) {
-                // Return an empty string if the lookup ever hits undefined.
-                if (val !== undefined) {
-                    val = val[path[i]];
-                } else {
-                    return "";
-                }
-            }
-
-            // Make sure the last piece did not end up undefined.
-            val = val || "";
-            return cleanVal(val);
-        },
-
         // Split a template in to tokens which will eventually be converted to 
         // nodes and then rendered.
         tokenize = function (templ) {
             return templ.split(new RegExp("(" + VAR_TAG.source + "|" + 
-                                          OPEN_IF_TAG.source + "|" + 
-                                          END_IF_TAG.source + ")"));
+                                          OPEN_BLOCK_TAG.source + "|" + 
+                                          CLOSE_BLOCK_TAG.source + ")"));
         },
 
         // "Lisp in C's clothing." - Douglas Crockford I believe.
@@ -232,6 +232,25 @@
             var node = makeObj(baseTextNode);
             node.text = token;
             return node;
+        },
+
+        // A recursive function that terminates either when all tokens have 
+        // been converted to nodes or an end-block tag is found.
+        makeNodes = function (tokens) {
+            return (function (nodes, tokens) {
+                var token = tokens[0];
+                return tokens.length === 0 ?
+                           [nodes, [], true] : 
+                       isEndTag(token) ? 
+                           [nodes, cdr(tokens)] :
+                       isVarTag(token) ? 
+                           arguments.callee(append(makeVarNode(token), nodes), cdr(tokens)) :
+                       isBlockTag(token) ? 
+                           makeBlockNode(nodes, tokens, arguments.callee) :
+                       // else
+                           arguments.callee(append(makeTextNode(token), nodes), cdr(tokens));
+                       
+            }([], tokens));
         },
 
         // Create a block tag's node by hijacking the "makeNodes" function 
@@ -282,25 +301,6 @@
             // Continue where we were before the block node.
             return f(append(node, nodes), cdr(tokens));
         },
-
-        // A recursive function that terminates either when all tokens have 
-        // been converted to nodes or an end-block tag is found.
-        makeNodes = function (tokens) {
-            return (function (nodes, tokens) {
-                var token = tokens[0];
-                return tokens.length === 0 ?
-                           [nodes, [], true] : 
-                       isEndTag(token) ? 
-                           [nodes, cdr(tokens)] :
-                       isVarTag(token) ? 
-                           arguments.callee(append(makeVarNode(token), nodes), cdr(tokens)) :
-                       isBlockTag(token) ? 
-                           makeBlockNode(nodes, tokens, arguments.callee) :
-                       // else
-                           arguments.callee(append(makeTextNode(token), nodes), cdr(tokens));
-                       
-            }([], tokens));
-        }
 
         // Return the template rendered with the given object(s) as a jQuery 
         // object.
