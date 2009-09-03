@@ -175,11 +175,9 @@
         // Determine if the string is a key to a stored template or a 
         // one-time-use template.
         chooseTemplate = function (str) {
-            if (templateCache[str] !== undefined) {
-                return templateCache[str];
-            } else {
-                return str;
-            }
+            return typeof templateCache[str] === "string" ?
+                templateCache[str] :
+                str;
         },
 
         // Return true if (and only if) an object is an array.
