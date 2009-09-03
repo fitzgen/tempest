@@ -101,6 +101,18 @@
             }
         },
 
+        // Base variable node object for prototyping.
+        baseVarNode = {
+            name: "",
+            render: function (context) {
+                var val = context[this.name] || "";
+                if (val === "" && this.name.search(/\./) !== -1) {
+                    return getValFromObj(this.name, context);
+                }
+                return cleanVal(val);
+            }
+        },
+
         // Clean the passed value the best we can.
         cleanVal = function (val) {
             if (val instanceof $) {
@@ -134,18 +146,6 @@
             // Make sure the last piece did not end up undefined.
             val = val || "";
             return cleanVal(val);
-        },
-
-        // Base variable node object for prototyping.
-        baseVarNode = {
-            name: "",
-            render: function (context) {
-                var val = context[this.name] || "";
-                if (val === "" && this.name.search(/\./) !== -1) {
-                    return getValFromObj(this.name, context);
-                }
-                return cleanVal(val);
-            }
         },
 
         // Hack to get the HTML of a jquery object as a string.
