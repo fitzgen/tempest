@@ -13,7 +13,7 @@
         <script type="text/javascript">
         $(document).ready(function(){
 
-            // TODO: write a test for the "toHTML" method look up.
+            // TODO: tests for if statements.
 
             function testStorageFromTextarea(){
                 var templ1 = $.tempest("template-message") == "<li>{{name}} says \"{{message}}\"</li>";
@@ -157,6 +157,16 @@
                 return rendered.text() === "object attribute";
             }
             fireunit.ok(testAccessObjectAttrs(), "Access a passed object's attributes");
+
+            function testToHTML() {
+                var obj = {
+                    obj: { toHTML: function () { return "Hello World" } }
+                };
+                var tmpl = "<p>{{ obj }}</p>";
+                var rendered = $.tempest(tmpl, obj);
+                return rendered.text() === "Hello World";
+            }
+            fireunit.ok(testToHTML(), "If an object is passed as a variable, render it with the toHTML method if it exists.");
 
             // evaluate all the tests
             fireunit.testDone();
