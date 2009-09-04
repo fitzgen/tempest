@@ -126,7 +126,7 @@
                     $.tempest(3242354534534);
                     return false;
                 } catch(error) {
-                    return error.name === "Input Error";
+                    return error.name === "InputError";
                 }
             }
             fireunit.ok(testUnknownInput(), "Unknown input throws an error");
@@ -177,9 +177,10 @@
 
             // see how long it takes to render 100 templates 20 times
             var deltas = [];
-            $("body ul:last").after("<h3>Rendering a set of 100 templates 100 times:</h3><ul></ul>");
-            for (i = 0; i < 100; i++) {
-                var start = new Date().getTime();
+            $("body ul:last").after("<h3>Rendering a set of 100 templates 20 times:</h3><ul></ul>");
+            for (i = 0; i < 20; i++) {
+                var start = new Date().getTime(),
+                    j;
                 for (j = 0; j < 100; j++) {
                     var obj = {thing:"test"};
                     var tmpl = "<li><em>Whoah a one time use {{thing}}!</em></li>";
