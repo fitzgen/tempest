@@ -105,7 +105,9 @@
         baseVarNode = {
             name: "",
             render: function (context) {
-                var val = context[this.name] || "";
+                var val = context[this.name] === undefined ?
+                    "" :
+                    context[this.name];
                 if (val === "" && this.name.search(/\./) !== -1) {
                     return getValFromObj(this.name, context);
                 }
@@ -144,7 +146,7 @@
             }
 
             // Make sure the last piece did not end up undefined.
-            val = val || "";
+            val = val === undefined ? "" : val;
             return cleanVal(val);
         },
 
