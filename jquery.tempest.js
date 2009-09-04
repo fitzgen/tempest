@@ -109,7 +109,8 @@
         // return the template rendered with the given object(s) as jQuery
         renderToJQ = function (str, objects) {
             var template = chooseTemplate(str),
-                lines = [];
+                lines = [],
+                joined;
 
             renderEach(objects, function (i, obj) {
                 lines.push(template.replace(/\{\{[ ]?[\w\-\.]+?[ ]?\}\}/g,
@@ -125,8 +126,14 @@
                 ));
             });
 
-            // return jQuery objects
-            return $(lines.join(""));
+            joined = lines.join("");
+            if (joined.search(/<[a-zA-Z]+>/) === 0) {
+                // return jQuery objects
+                return $(lines.join(""));
+            } else {
+                // return string
+                return joined;
+            }
         };
 
     // EXTEND JQUERY OBJECT

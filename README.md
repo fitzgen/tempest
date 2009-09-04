@@ -102,5 +102,15 @@ Access an object's attributes with the dot notation:
             "full_name": "Nick Fitzgerald"
         }
 
+<<<<<<< HEAD:README.md
+I was not satisifed with the other templating plugins available, so I wrote my own. This templating system is very simple and enforces the seperation of form and function, or HTML and JS. This provides a great abstraction layer so that you can write a template and then promptly remove the mental overhead of rendering js objects to HTML. 
+ 
+Other templating languages just build and execute function blocks with strings. Any type of js logic you could want is included and evaluated. For some people, this may be the freedom that they want. 
+ 
+On the other hand, Tempest will only fill in values and iterate over arrays for you. This forces you to remove any programming logic from the templates and seperate form from function. This type of templating philosophy can also be seen in the Django templating language. 
+ 
+The big thing, for me, is that iteration is handled seemlessly. Just pass an array of objects to tempest instead of a single object and it will return a jquery element array. 
+=======
     });
     // returns jQuery: [ <p>My name is <em>Nick Fitzgerald</em></p> ]
+>>>>>>> 9cfe0f077bd51471c2d25c2138809c02fae59f14:README.md
