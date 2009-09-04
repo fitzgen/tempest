@@ -39,7 +39,7 @@
         // Probably, you don't want to mess with these, as they are built from 
         // the ones above.
         VAR_TAG = new RegExp(OPEN_VAR_TAG.source + 
-            "[\\w\\-\\.] + " + 
+            "[\\w\\-\\.]+?" + 
             CLOSE_VAR_TAG.source, "g"),
         BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source + 
             "[\\w]+?[ ]+?[\\w\\-\\.]*?" + 
@@ -190,11 +190,9 @@
         // Call a rendering function on arrays of objects or just a single 
         // object seamlessly.
         renderEach = function (data, f) {
-            if (isArray(data)) {
-                return $.each(data, f);
-            } else {
-                return f(0, data);
-            }
+            return isArray(data) ?
+                $.each(data, f) :
+                f(0, data);
         },
 
         // Split a template in to tokens which will eventually be converted to 
