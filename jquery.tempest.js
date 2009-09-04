@@ -199,11 +199,11 @@
         // nodes and then rendered.
         tokenize = function (templ) {
             return templ.split(new RegExp("(" + VAR_TAG.source + "|" + 
-                                          OPEN_BLOCK_TAG.source + "|" + 
-                                          CLOSE_BLOCK_TAG.source + ")"));
+                                          BLOCK_TAG.source + "|" + 
+                                          END_BLOCK_TAG.source + ")"));
         },
 
-        // "Lisp in C's clothing." - Douglas Crockford I believe.
+        // "Lisp in C's clothing." - Douglas Crockford
         cdr = function (arr) {
             return arr.slice(1);
         },
@@ -249,14 +249,23 @@
             }([], tokens));
         },
 
+        // Some browsers are returning an array with the first element equal to
+        // the empty string so we have to test for that here.
+        makeBits = function (blockToken) {
+            var bits = blockToken.replace(OPEN_BLOCK_TAG, "")
+                                 .replace(CLOSE_BLOCK_TAG, "")
+                                 .split(/[ ]+?/);
+            return bits[0] === "" ? 
+                cdr(bits) : 
+                bits;
+        },
+
         // Create a block tag's node by hijacking the "makeNodes" function 
         // until an end-block is found.
         makeBlockNode = function (nodes, tokens, f) {
             // Remove the templating syntax and split the type of block tag and
             // its arguments.
-            var bits = tokens[0].replace(OPEN_BLOCK_TAG, "")
-                                .replace(CLOSE_BLOCK_TAG, "")
-                                .split(/[ ]+?/),
+            var bits = makeBits(tokens[0]),
 
                 // The type of block tag is the first of the bits, the rest 
                 // (if present) are args
