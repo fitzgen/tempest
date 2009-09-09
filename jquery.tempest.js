@@ -48,18 +48,6 @@
             "end[\\w]*?" + 
             CLOSE_BLOCK_TAG.source, "g"),
 
-        // A few quick functions for testing what type of tag a token is with 
-        // the regexs.
-        isBlockTag = function (token) {
-            return BLOCK_TAG.test(token);
-        },
-        isEndTag = function (token) {
-            return END_BLOCK_TAG.test(token);
-        },
-        isVarTag = function (token) {
-            return VAR_TAG.test(token);
-        },
-
         // All block tags stored in here. Tags have a couple things to work 
         // with:
         //
@@ -113,231 +101,243 @@
                 }
                 return cleanVal(val);
             }
-        },
+        };
 
-        // Clean the passed value the best we can.
-        cleanVal = function (val) {
-            if (val instanceof $) {
-                return jQueryToString(val);
-            } else if (!isArray(val) && typeof(val) === "object") { 
-                if (typeof(val.toHTML) === "function") {
-                    return cleanVal(val.toHTML());
-                } else {
-                    return val.toString();
-                }
+    // A few quick functions for testing what type of tag a token is with 
+    // the regexs.
+    function isBlockTag(token) {
+        return BLOCK_TAG.test(token);
+    }
+    function isEndTag(token) {
+        return END_BLOCK_TAG.test(token);
+    }
+    function isVarTag(token) {
+        return VAR_TAG.test(token);
+    }
+
+    // Clean the passed value the best we can.
+    function cleanVal(val) {
+        if (val instanceof $) {
+            return jQueryToString(val);
+        } else if (!isArray(val) && typeof(val) === "object") { 
+            if (typeof(val.toHTML) === "function") {
+                return cleanVal(val.toHTML());
             } else {
-                return val;
+                return val.toString();
             }
-        },
+        } else {
+            return val;
+        }
+    }
 
-        // Traverse a path of an obj from a string representation, 
-        // for example "object.child.attr".
-        getValFromObj = function (str, obj) {
-            var path = str.split("."),
-                val = obj[path[0]],
-                i;
-            for (i = 1; i < path.length; i++) {
-                // Return an empty string if the lookup ever hits undefined.
-                if (val !== undefined) {
-                    val = val[path[i]];
-                } else {
-                    return "";
-                }
+    // Traverse a path of an obj from a string representation, 
+    // for example "object.child.attr".
+    function getValFromObj(str, obj) {
+        var path = str.split("."),
+            val = obj[path[0]],
+            i;
+        for (i = 1; i < path.length; i++) {
+            // Return an empty string if the lookup ever hits undefined.
+            if (val !== undefined) {
+                val = val[path[i]];
+            } else {
+                return "";
             }
+        }
 
-            // Make sure the last piece did not end up undefined.
-            val = val === undefined ? "" : val;
-            return cleanVal(val);
-        },
+        // Make sure the last piece did not end up undefined.
+        val = val === undefined ? "" : val;
+        return cleanVal(val);
+    }
 
-        // Hack to get the HTML of a jquery object as a string.
-        jQueryToString = function (jq) {
-            return $(document.createElement("div")).append(jq).html();
-        },
+    // Hack to get the HTML of a jquery object as a string.
+    function jQueryToString(jq) {
+        return $(document.createElement("div")).append(jq).html();
+    }
 
-        // Make a new copy of a given object with psuedo class style heritage.
-        makeObj = function (obj) {
-            if (obj === undefined) {
-                return obj;
-            }
-            var O = function () {};
-            O.prototype = obj;
-            return new O();
-        },
+    // Make a new copy of a given object with psuedo class style heritage.
+    function makeObj(obj) {
+        if (obj === undefined) {
+            return obj;
+        }
+        var O = function () {};
+        O.prototype = obj;
+        return new O();
+    }
 
-        // Return an array of key/template pairs.
-        storedTemplates = function () {
-            var cache = [];
-            $.each(templateCache, function (key, templ) {
-                cache.push([ key, templ ]);
+    // Return an array of key/template pairs.
+    function storedTemplates() {
+        var cache = [];
+        $.each(templateCache, function (key, templ) {
+            cache.push([ key, templ ]);
+        });
+        return cache;
+    }
+
+    // Determine if the string is a key to a stored template or a 
+    // one-time-use template.
+    function chooseTemplate(str) {
+        return typeof templateCache[str] === "string" ?
+            templateCache[str] :
+            str;
+    }
+
+    // Return true if (and only if) an object is an array.
+    function isArray(objToTest) {
+        return Object.prototype
+                     .toString
+                     .apply(objToTest) === "[object Array]";
+    }
+
+    // Call a rendering function on arrays of objects or just a single 
+    // object seamlessly.
+    function renderEach(data, f) {
+        return isArray(data) ?
+            $.each(data, f) :
+            f(0, data);
+    }
+
+    // Split a template in to tokens which will eventually be converted to 
+    // nodes and then rendered.
+    function tokenize(templ) {
+        return templ.split(new RegExp("(" + VAR_TAG.source + "|" + 
+                                      BLOCK_TAG.source + "|" + 
+                                      END_BLOCK_TAG.source + ")"));
+    }
+
+    // "Lisp in C's clothing." - Douglas Crockford
+    function cdr(arr) {
+        return arr.slice(1);
+    }
+
+    // Array.push changes the original array in place and returns the new 
+    // length of the array rather than the the actual array itself. This 
+    // makes it unchainable, which is ridiculous.
+    function append(item, list) {
+        return list.concat([item]);
+    }
+
+    // Take a token and create a variable node from it.
+    function makeVarNode(token) {
+        var node = makeObj(baseVarNode);
+        node.name = token.replace(OPEN_VAR_TAG, "")
+                         .replace(CLOSE_VAR_TAG, "");
+        return node;
+    }
+
+    // Take a token and create a text node from it.
+    function makeTextNode(token) {
+        var node = makeObj(baseTextNode);
+        node.text = token;
+        return node;
+    }
+
+    // A recursive function that terminates either when all tokens have 
+    // been converted to nodes or an end-block tag is found.
+    function makeNodes(tokens) {
+        return (function (nodes, tokens) {
+            var token = tokens[0];
+            return tokens.length === 0 ?
+                       [nodes, [], true] : 
+                   isEndTag(token) ? 
+                       [nodes, cdr(tokens)] :
+                   isVarTag(token) ? 
+                       arguments.callee(append(makeVarNode(token), nodes), cdr(tokens)) :
+                   isBlockTag(token) ? 
+                       makeBlockNode(nodes, tokens, arguments.callee) :
+                   // else
+                       arguments.callee(append(makeTextNode(token), nodes), cdr(tokens));
+                   
+        }([], tokens));
+    }
+
+    // Some browsers are returning an array with the first element equal to
+    // the empty string so we have to test for that here.
+    function makeBits(blockToken) {
+        var bits = blockToken.replace(OPEN_BLOCK_TAG, "")
+                             .replace(CLOSE_BLOCK_TAG, "")
+                             .split(/[ ]+?/);
+        return bits[0] === "" ? 
+            cdr(bits) : 
+            bits;
+    }
+
+    // Create a block tag's node by hijacking the "makeNodes" function 
+    // until an end-block is found.
+    function makeBlockNode(nodes, tokens, f) {
+        // Remove the templating syntax and split the type of block tag and
+        // its arguments.
+        var bits = makeBits(tokens[0]),
+
+            // The type of block tag is the first of the bits, the rest 
+            // (if present) are args
+            type = bits[0],
+            args = cdr(bits),
+
+            // Make the node from the set of block tags that Tempest knows 
+            // about.
+            node = makeObj(BLOCK_NODES[type]),
+            resultsArray;
+
+        // Ensure that the type of block tag is one that is defined in 
+        // BLOCK_NODES
+        if (node === undefined) {
+            throw ({
+                name: "TemplateSyntaxError",
+                message: "Unkown Block Tag."
             });
-            return cache;
-        },
+        }
 
-        // Determine if the string is a key to a stored template or a 
-        // one-time-use template.
-        chooseTemplate = function (str) {
-            return typeof templateCache[str] === "string" ?
-                templateCache[str] :
-                str;
-        },
+        node.args = args;
 
-        // Return true if (and only if) an object is an array.
-        isArray = function (objToTest) {
-            return Object.prototype
-                         .toString
-                         .apply(objToTest) === "[object Array]";
-        },
-
-        // Call a rendering function on arrays of objects or just a single 
-        // object seamlessly.
-        renderEach = function (data, f) {
-            return isArray(data) ?
-                $.each(data, f) :
-                f(0, data);
-        },
-
-        // Split a template in to tokens which will eventually be converted to 
-        // nodes and then rendered.
-        tokenize = function (templ) {
-            return templ.split(new RegExp("(" + VAR_TAG.source + "|" + 
-                                          BLOCK_TAG.source + "|" + 
-                                          END_BLOCK_TAG.source + ")"));
-        },
-
-        // "Lisp in C's clothing." - Douglas Crockford
-        cdr = function (arr) {
-            return arr.slice(1);
-        },
-
-        // Array.push changes the original array in place and returns the new 
-        // length of the array rather than the the actual array itself. This 
-        // makes it unchainable, which is ridiculous.
-        append = function (item, list) {
-            return list.concat([item]);
-        },
-
-        // Take a token and create a variable node from it.
-        makeVarNode = function (token) {
-            var node = makeObj(baseVarNode);
-            node.name = token.replace(OPEN_VAR_TAG, "")
-                             .replace(CLOSE_VAR_TAG, "");
-            return node;
-        },
-
-        // Take a token and create a text node from it.
-        makeTextNode = function (token) {
-            var node = makeObj(baseTextNode);
-            node.text = token;
-            return node;
-        },
-
-        // A recursive function that terminates either when all tokens have 
-        // been converted to nodes or an end-block tag is found.
-        makeNodes = function (tokens) {
-            return (function (nodes, tokens) {
-                var token = tokens[0];
-                return tokens.length === 0 ?
-                           [nodes, [], true] : 
-                       isEndTag(token) ? 
-                           [nodes, cdr(tokens)] :
-                       isVarTag(token) ? 
-                           arguments.callee(append(makeVarNode(token), nodes), cdr(tokens)) :
-                       isBlockTag(token) ? 
-                           makeBlockNode(nodes, tokens, arguments.callee) :
-                       // else
-                           arguments.callee(append(makeTextNode(token), nodes), cdr(tokens));
-                       
-            }([], tokens));
-        },
-
-        // Some browsers are returning an array with the first element equal to
-        // the empty string so we have to test for that here.
-        makeBits = function (blockToken) {
-            var bits = blockToken.replace(OPEN_BLOCK_TAG, "")
-                                 .replace(CLOSE_BLOCK_TAG, "")
-                                 .split(/[ ]+?/);
-            return bits[0] === "" ? 
-                cdr(bits) : 
-                bits;
-        },
-
-        // Create a block tag's node by hijacking the "makeNodes" function 
-        // until an end-block is found.
-        makeBlockNode = function (nodes, tokens, f) {
-            // Remove the templating syntax and split the type of block tag and
-            // its arguments.
-            var bits = makeBits(tokens[0]),
-
-                // The type of block tag is the first of the bits, the rest 
-                // (if present) are args
-                type = bits[0],
-                args = cdr(bits),
-
-                // Make the node from the set of block tags that Tempest knows 
-                // about.
-                node = makeObj(BLOCK_NODES[type]),
-                resultsArray;
-
-            // Ensure that the type of block tag is one that is defined in 
-            // BLOCK_NODES
-            if (node === undefined) {
+        if (node.expectsEndTag === true) {
+            resultsArray = makeNodes(tokens);
+            if (resultsArray[2] !== undefined) {
+                // The third item in the array returned by makeNodes is 
+                // only defined if the last of the tokens was made in to a 
+                // node and it wasn't an end-block tag.
                 throw ({
                     name: "TemplateSyntaxError",
-                    message: "Unkown Block Tag."
+                    message: "A block tag was expecting an ending tag but it was not found."
+                });
+            }
+            node.subNodes = resultsArray[0];
+            tokens = resultsArray[1];
+        }
+
+        // Continue where we were before the block node.
+        return f(append(node, nodes), cdr(tokens));
+    }
+
+    // Return the template rendered with the given object(s) as a jQuery 
+    // object.
+    function renderToJQ(str, objects) {
+        var template = chooseTemplate(str),
+            lines = [];
+
+        renderEach(objects, function (i, obj) {
+            var resultsArray = makeNodes(tokenize(template), obj),
+                nodes = resultsArray[0];
+
+            // Check for tokens left over in the results array, this means 
+            // that not all tokens were rendered because there are more 
+            // end-block tagss than block tags that expect an end.
+            if (resultsArray[1].length !== 0) {
+                throw ({
+                    name: "TemplateSyntaxError",
+                    message: "An unexpected end tag was found."
                 });
             }
 
-            node.args = args;
-
-            if (node.expectsEndTag === true) {
-                resultsArray = makeNodes(tokens);
-                if (resultsArray[2] !== undefined) {
-                    // The third item in the array returned by makeNodes is 
-                    // only defined if the last of the tokens was made in to a 
-                    // node and it wasn't an end-block tag.
-                    throw ({
-                        name: "TemplateSyntaxError",
-                        message: "A block tag was expecting an ending tag but it was not found."
-                    });
-                }
-                node.subNodes = resultsArray[0];
-                tokens = resultsArray[1];
-            }
-
-            // Continue where we were before the block node.
-            return f(append(node, nodes), cdr(tokens));
-        },
-
-        // Return the template rendered with the given object(s) as a jQuery 
-        // object.
-        renderToJQ = function (str, objects) {
-            var template = chooseTemplate(str),
-                lines = [];
-
-            renderEach(objects, function (i, obj) {
-                var resultsArray = makeNodes(tokenize(template), obj),
-                    nodes = resultsArray[0];
-
-                // Check for tokens left over in the results array, this means 
-                // that not all tokens were rendered because there are more 
-                // end-block tagss than block tags that expect an end.
-                if (resultsArray[1].length !== 0) {
-                    throw ({
-                        name: "TemplateSyntaxError",
-                        message: "An unexpected end tag was found."
-                    });
-                }
-
-                // Render each node and push it to the lines.
-                $.each(nodes, function (i, node) {
-                    lines.push(node.render(obj));
-                });
+            // Render each node and push it to the lines.
+            $.each(nodes, function (i, node) {
+                lines.push(node.render(obj));
             });
+        });
 
-            // Return the joined templates as jQuery objects
-            return $(lines.join(""));
-        };
+        // Return the joined templates as jQuery objects
+        return $(lines.join(""));
+    }
 
     // EXTEND JQUERY OBJECT
     $.extend({
