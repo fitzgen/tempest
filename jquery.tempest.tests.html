@@ -7,6 +7,9 @@
         <textarea class="tempest-template" title="template-web-things" style="display:none;">
             <li>{{name}} is a {{type}} at {{url}}</li>
         </textarea>
+        <textarea class="tempest-template" title="if-template" style="display:none;">
+            <li>hello {% if t %}world{% endif %}</li>
+        </textarea>
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
         <script type="text/javascript" src="jquery.tempest.js"></script>
@@ -21,7 +24,7 @@
             fireunit.ok(testStorageFromTextarea(), "Access stored templates that were inside textareas");
 
             function testGetAllTemplatesLength(){
-                return $.tempest().length == 2;
+                return $.tempest().length == 3;
             }
             fireunit.ok(testGetAllTemplatesLength(), "Length of $.tempest() is equal to number of textarea templates pre-defined");
 
@@ -124,7 +127,7 @@
                     $.tempest(3242354534534);
                     return false;
                 } catch(error) {
-                    return error.name === "Input Error";
+                    return error.name === "InputError";
                 }
             }
             fireunit.ok(testUnknownInput(), "Unknown input throws an error");
@@ -156,6 +159,16 @@
             }
             fireunit.ok(testAccessObjectAttrs(), "Access a passed object's attributes");
 
+            function testToHTML() {
+                var obj = {
+                    obj: { toHTML: function () { return "Hello World" } }
+                };
+                var tmpl = "<p>{{ obj }}</p>";
+                var rendered = $.tempest(tmpl, obj);
+                return rendered.text() === "Hello World";
+            }
+            fireunit.ok(testToHTML(), "If an object is passed as a variable, render it with the toHTML method if it exists.");
+
             // evaluate all the tests
             fireunit.testDone();
 
@@ -165,52 +178,59 @@
 
             // see how long it takes to render 100 templates 20 times
             var deltas = [];
-            $("body ul:last").after("<h3>Rendering a set of 100 templates 100 times:</h3><ul></ul>");
-            for (i = 0; i < 100; i++) {
-                var start = new Date().getTime();
-                for (j = 0; j < 100; j++) {
-                    var obj = {thing:"test"};
-                    var tmpl = "<li><em>Whoah a one time use {{thing}}!</em></li>";
-                    var rendered = $.tempest(tmpl, obj);
+            var count = 0;
+            $("body ul:last").after("<h3>Rendering a template 1000 times:</h3><ul></ul><p></p>");
+
+            setTimeout(function () {
+                // show a little something so we know that the tests haven't stalled
+                var last_p = $("p:last");
+                last_p.html(last_p.html()+". ");
+
+                if (count < 1000) {
+                    var start = new Date().getTime();
+                    $.tempest("<li><em>Whoah a one time use {{thing}}!</em></li>", {
+                        thing: "test"
+                    });
+                    var end = new Date().getTime();
+                    var delta = end - start;
+                    deltas.push(delta);
+
+                    // recur
+                    count++;
+                    return setTimeout(arguments.callee, 1);
+                } else {
+                    return calcSpeedStats();
                 }
-                var end = new Date().getTime();
-                var delta = (end - start);
-                deltas.push(delta);
-                $("body ul:last").append("<li>Set "+i+": "+delta+" ms</li>")
-            }
+            }, 1);
 
-            // avg (mean)
-            var total = 0;
-            for (i = 0; i < deltas.length; i++) {
-                total += deltas[i];
-            }
-            var avg = total / deltas.length;
+            function calcSpeedStats() {
+                $("p:last").hide();
+                // avg (mean)
+                var total = 0;
+                for (i = 0; i < deltas.length; i++) {
+                    total += deltas[i];
+                }
+                var avg = total / deltas.length;
 
-            // std deviation
-            var diffs = [];
-            for (i = 0; i < deltas.length; i++) {
-                diffs[i] = (deltas[i] - avg) * (deltas[i] - avg);
-            }
-            var stdDevTotal = 0;
-            for (i = 0; i < diffs.length; i++) {
-                stdDevTotal += diffs[i];
-            }
-            var stdDev = Math.sqrt(stdDevTotal / diffs.length);
+                // std deviation
+                var diffs = [];
+                for (i = 0; i < deltas.length; i++) {
+                    diffs[i] = (deltas[i] - avg) * (deltas[i] - avg);
+                }
+                var stdDevTotal = 0;
+                for (i = 0; i < diffs.length; i++) {
+                    stdDevTotal += diffs[i];
+                }
+                var stdDev = Math.sqrt(stdDevTotal / diffs.length);
 
-            // max/min
-            Array.prototype.max = function(){
-                return Math.max.apply( Math, this );
-            };
-            Array.prototype.min = function(){
-                return Math.min.apply( Math, this );
-            };
-            var max = deltas.max();
-            var min = deltas.min();
+                var max = Math.max.apply(Math, deltas);
+                var min = Math.min.apply(Math, deltas);
 
-            $("body ul:last").before("<p>The avg. time was "+avg+" ms</p>")
-            $("body ul:last").before("<p>The standard deviation was "+stdDev+" ms</p>")
-            $("body ul:last").before("<p>The max time was "+max+" ms</p>")
-            $("body ul:last").before("<p>The min time was "+min+" ms</p>")
+                $("body ul:last").append("<li>The avg. time was "+avg+" ms</li>")
+                $("body ul:last").append("<li>The standard deviation was "+stdDev+" ms</li>")
+                $("body ul:last").append("<li>The max time was "+max+" ms</li>")
+                $("body ul:last").append("<li>The min time was "+min+" ms</li>")
+            }
 
 
         });
