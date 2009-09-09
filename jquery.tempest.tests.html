@@ -12,6 +12,9 @@
         </textarea>
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+        <script type="text/javascript">
+            tempestPrivates = {};
+        </script>
         <script type="text/javascript" src="jquery.tempest.js"></script>
         <script type="text/javascript">
         $(document).ready(function(){
@@ -178,6 +181,24 @@
                 return $.tempest("if-template", { t: false }).text() === "hello ";
             }
             fireunit.ok(testIfStatementTrue(), "If statements that are evaluated to false are working as expected");
+
+            // Private functions from window.tempestPrivates
+
+            fireunit.ok((function () {
+                return tempestPrivates.isBlockTag("{% if var %}");
+            }()), "isBlockTag recognizes block tags.");
+
+            fireunit.ok((function () {
+                return tempestPrivates.isEndTag("{% endif %}");
+            }()), "isEndTag recognizes end tags.");
+
+            fireunit.ok((function () {
+                return tempestPrivates.isVarTag("{{ var }}");
+            }()), "isVarTag recognizes variable tags.");
+
+            fireunit.ok((function () {
+                return tempestPrivates.cleanVal($("p")) === tempestPrivates.jQueryToString($("p"));
+            }()), "cleanVal renders jQuery objects correctly");
 
             // evaluate all the tests
             fireunit.testDone();

@@ -26,7 +26,7 @@
 "use strict";
 
 (function ($) {
-    // PRIVATE VARS AND FUNCTIONS
+    // PRIVATE VARIABLES
     var templateCache = {},
         
         // TAG REGULAR EXPRESSIONS
@@ -103,8 +103,8 @@
             }
         };
 
-    // A few quick functions for testing what type of tag a token is with 
-    // the regexs.
+    // PRIVATE FUNCTIONS
+
     function isBlockTag(token) {
         return BLOCK_TAG.test(token);
     }
@@ -155,7 +155,7 @@
         return $(document.createElement("div")).append(jq).html();
     }
 
-    // Make a new copy of a given object with psuedo class style heritage.
+    // Make a new copy of a given object.
     function makeObj(obj) {
         if (obj === undefined) {
             return obj;
@@ -337,6 +337,35 @@
 
         // Return the joined templates as jQuery objects
         return $(lines.join(""));
+    }
+
+    // EXPOSE PRIVATE FUNCTIONS FOR TESTING
+    if (window.tempestPrivates) {
+        // Make it easier to attach the private methods methods to the public
+        // object.
+        function a(name, fn) {
+            window.tempestPrivates[name] = fn;
+        }
+        a("isBlockTag", isBlockTag);
+        a("isEndTag", isEndTag);
+        a("isVarTag", isVarTag);
+        a("cleanVal", cleanVal);
+        a("getValFromObj", getValFromObj);
+        a("jQueryToString", jQueryToString);
+        a("makeObj", makeObj);
+        a("storedTemplates", storedTemplates);
+        a("chooseTemplate", chooseTemplate);
+        a("isArray", isArray);
+        a("renderEach", renderEach);
+        a("tokenize", tokenize);
+        a("cdr", cdr);
+        a("append", append);
+        a("makeVarNode", makeVarNode);
+        a("makeTextNode", makeTextNode);
+        a("makeNodes", makeNodes);
+        a("makeBits", makeBits);
+        a("makeBlockNode", makeBlockNode);
+        a("renderToJQ", renderToJQ);
     }
 
     // EXTEND JQUERY OBJECT
