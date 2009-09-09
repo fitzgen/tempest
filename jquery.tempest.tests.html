@@ -264,6 +264,18 @@
                 return tempestPrivates.isArray({length: 2, 0:1, 1:2}) === false;
             }()), "isArray isn't fooled by look-a-like objects.");
 
+            // TODO: renderEach
+
+            // TODO: this is failing because it includes empty strings. How do
+            // I want to handle this?
+            fireunit.ok((function () {
+                return tempestPrivates.tokenize("<li>{% if t %}{{ var }}{% endif %} word</li>").length === 5;
+            }()), "tokenize splits a template in to the proper amount of chunks.");
+
+            fireunit.ok((function () {
+                return tempestPrivates.tokenize("<li>{% if t %}{{ var }}{% endif %} word</li>")[0] === "<li>";
+            }()), "tokenize splits the first token from the template string correctly.");
+
             // evaluate all the tests
             fireunit.testDone();
 
