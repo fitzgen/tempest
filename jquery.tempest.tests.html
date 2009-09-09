@@ -7,13 +7,14 @@
         <textarea class="tempest-template" title="template-web-things" style="display:none;">
             <li>{{name}} is a {{type}} at {{url}}</li>
         </textarea>
+        <textarea class="tempest-template" title="if-template" style="display:none;">
+            <li>hello {% if t %}world{% endif %}</li>
+        </textarea>
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
         <script type="text/javascript" src="jquery.tempest.js"></script>
         <script type="text/javascript">
         $(document).ready(function(){
-
-            // TODO: tests for if statements.
 
             function testStorageFromTextarea(){
                 var templ1 = $.tempest("template-message") == "<li>{{name}} says \"{{message}}\"</li>";
@@ -167,6 +168,16 @@
                 return rendered.text() === "Hello World";
             }
             fireunit.ok(testToHTML(), "If an object is passed as a variable, render it with the toHTML method if it exists.");
+
+            function testIfStatementTrue() {
+                return $.tempest("if-template", { t: true }).text() === "hello world";
+            }
+            fireunit.ok(testIfStatementTrue(), "If statements that are evaluated to true are working as expected");
+
+            function testIfStatementTrue() {
+                return $.tempest("if-template", { t: false }).text() === "hello ";
+            }
+            fireunit.ok(testIfStatementTrue(), "If statements that are evaluated to false are working as expected");
 
             // evaluate all the tests
             fireunit.testDone();
