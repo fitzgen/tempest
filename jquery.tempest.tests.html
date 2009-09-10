@@ -189,14 +189,23 @@
             fireunit.ok((function () {
                 return tempestPrivates.isBlockTag("{% if var %}");
             }()), "isBlockTag recognizes block tags.");
+            fireunit.ok((function () {
+                return tempestPrivates.isBlockTag("{%if var%}");
+            }()), "isBlockTag recognizes block tags w/out spaces.");
 
             fireunit.ok((function () {
                 return tempestPrivates.isEndTag("{% endif %}");
             }()), "isEndTag recognizes end tags.");
+            fireunit.ok((function () {
+                return tempestPrivates.isEndTag("{%endif%}");
+            }()), "isEndTag recognizes end tags w/out spaces.");
 
             fireunit.ok((function () {
                 return tempestPrivates.isVarTag("{{ var }}");
             }()), "isVarTag recognizes variable tags.");
+            fireunit.ok((function () {
+                return tempestPrivates.isVarTag("{{var}}");
+            }()), "isVarTag recognizes variable tags w/out spaces.");
 
             fireunit.ok((function () {
                 return tempestPrivates.cleanVal($("p")) === tempestPrivates.jQueryToString($("p"));
@@ -285,16 +294,67 @@
                 return rest[0] === 2 && rest[1] === 3;
             }()), "cdr returns the proper values for the array of everything but the first item.");
 
-            // TODO: these private methods:
-//            a("append", append);
-//            a("makeVarNode", makeVarNode);
-//            a("makeTextNode", makeTextNode);
-//            a("makeNodes", makeNodes);
-//            a("makeBits", makeBits);
-//            a("makeBlockNode", makeBlockNode);
-//            a("renderToJQ", renderToJQ);
+            fireunit.ok((function () {
+                var arr = tempestPrivates.append(4, [1,2,3]);
+                return tempestPrivates.isArray(arr) && arr.length === 4 && arr[3] === 4;
+            }()), "append returns a new array with the item appended.");
 
-            // evaluate all the tests
+            fireunit.ok((function () {
+                var node = tempestPrivates.makeVarNode("{{ var }}");
+                return node.name === "var" && typeof(node.render) === "function";
+            }()), "makeVarNode creates an object with the proper name and a render function");
+
+            fireunit.ok((function () {
+                var node = tempestPrivates.makeVarNode("{{ var }}");
+                return node.render({ "var": "hello" }) === "hello" && node.render({}) === "";
+            }()), "nodes made with makeVarNode render properly.");
+
+            fireunit.ok((function () {
+                var node = tempestPrivates.makeTextNode("Hello World");
+                return node.text === "Hello World" && typeof(node.render) === "function";
+            }()), "makeTextNode creates an object with a text attribute and a render function");
+
+            fireunit.ok((function () {
+                var node = tempestPrivates.makeTextNode("Hello World");
+                return node.render({}) === "Hello World";
+            }()), "nodes made with makeTextNode render properly");
+
+            fireunit.ok((function () {
+                var results = tempestPrivates.makeNodes(["Hello World", "{{ var }}", "woo haa"]);
+                var nodes = results[0];
+                return typeof(nodes[0].text) === "string" &&
+                       typeof(nodes[1].name) === "string" && 
+                       typeof(nodes[2].text) === "string";
+            }()), "makeNodes creates the proper types of nodes from the bits");
+
+            fireunit.ok((function () {
+                var results = tempestPrivates.makeNodes(["Hello World", "{{ var }}", "woo haa"]);
+                var tokens = results[1];
+                return tokens.length === 0 && results[2] === true;
+            }()), "makeNodes returns no more tokens in its results when no" +
+                  " endblock is found, and the last item in the results is" +
+                  " true, because makeNodes reached the end of the tokens.");
+
+            fireunit.ok((function () {
+                var results = tempestPrivates.makeNodes(["{% endif %}", "Hello World", "{{ var }}"]);
+                var nodes = results[0]
+                var tokens = results[1];
+                return tokens.length === 2 && nodes.length === 0;
+            }()), "makeNodes returns the rest of the tokens when an endblock is located.");
+
+            fireunit.ok((function () {
+                var bits = tempestPrivates.makeBits("{% if var %}");
+                return bits[0] === "if" && bits[1] === "var" && bits.length === 2;
+            }()), "makeBits creates the proper array of bits from a block tag.");
+
+            // TODO: makeBlockNode
+            // TODO: renderToJQ
+
+            fireunit.ok((function () {
+                return tempestPrivates.strip("  hello world   ") === "hello world";
+            }()), "strip removes whitespace from front and back");
+
+            // evaluate all the tests and tally up results.
             fireunit.testDone();
 
 

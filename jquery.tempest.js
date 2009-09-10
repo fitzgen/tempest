@@ -91,7 +91,6 @@
 
         // Base variable node object for prototyping.
         baseVarNode = {
-            name: "",
             render: function (context) {
                 var val = context[this.name] === undefined ?
                     "" :
@@ -113,6 +112,10 @@
     }
     function isVarTag(token) {
         return VAR_TAG.test(token);
+    }
+
+    function strip(str) {
+        return str.replace(/^[\s]+/, "").replace(/[\s]+$/, "");
     }
 
     // Clean the passed value the best we can.
@@ -220,8 +223,8 @@
     // Take a token and create a variable node from it.
     function makeVarNode(token) {
         var node = makeObj(baseVarNode);
-        node.name = token.replace(OPEN_VAR_TAG, "")
-                         .replace(CLOSE_VAR_TAG, "");
+        node.name = strip(token.replace(OPEN_VAR_TAG, "")
+                               .replace(CLOSE_VAR_TAG, ""));
         return node;
     }
 
@@ -251,15 +254,23 @@
         }([], tokens));
     }
 
-    // Some browsers are returning an array with the first element equal to
-    // the empty string so we have to test for that here.
+    // Split a block tags contents in to an array of bits that contains the
+    // type of block node, and any arguments that were passed to the block
+    // node if they exist.
     function makeBits(blockToken) {
-        var bits = blockToken.replace(OPEN_BLOCK_TAG, "")
-                             .replace(CLOSE_BLOCK_TAG, "")
-                             .split(/[ ]+?/);
-        return bits[0] === "" ? 
-            cdr(bits) : 
-            bits;
+        var split = blockToken.replace(OPEN_BLOCK_TAG, "")
+                              .replace(CLOSE_BLOCK_TAG, "")
+                              .split(/[ ]+?/),
+            bits = [];
+
+        // Remove empty strings and strip whitespace.
+        for (i = 0; i < split.length; i++) {
+            (function (peice) {
+                var bit = strip(peice);
+                return bit === "" ? null : bits.push(bit);
+            }(split[i]));
+        }
+        return bits;
     }
 
     // Create a block tag's node by hijacking the "makeNodes" function 
@@ -366,6 +377,7 @@
         a("makeBits", makeBits);
         a("makeBlockNode", makeBlockNode);
         a("renderToJQ", renderToJQ);
+        a("strip", strip);
     }
 
     // EXTEND JQUERY OBJECT
