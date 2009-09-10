@@ -39,14 +39,16 @@
         // Probably, you don't want to mess with these, as they are built from 
         // the ones above.
         VAR_TAG = new RegExp(OPEN_VAR_TAG.source + 
-            "[\\w\\-\\.]+?" + 
-            CLOSE_VAR_TAG.source, "g"),
+                             "[\\w\\-\\.]+?" + 
+                             CLOSE_VAR_TAG.source, "g"),
+
         BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source + 
-            "[\\w]+?[ ]+?[\\w\\-\\.]*?" + 
-            CLOSE_BLOCK_TAG.source, "g"),
+                               "[\\w]+?[ ]+?[\\w\\-\\.]*?" + 
+                               CLOSE_BLOCK_TAG.source, "g"),
+
         END_BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source + 
-            "end[\\w]*?" + 
-            CLOSE_BLOCK_TAG.source, "g"),
+                                   "end[\\w]*?" + 
+                                   CLOSE_BLOCK_TAG.source, "g"),
 
         // All block tags stored in here. Tags have a couple things to work 
         // with:
