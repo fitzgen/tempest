@@ -205,9 +205,19 @@
     // Split a template in to tokens which will eventually be converted to 
     // nodes and then rendered.
     function tokenize(templ) {
-        return templ.split(new RegExp("(" + VAR_TAG.source + "|" + 
-                                      BLOCK_TAG.source + "|" + 
-                                      END_BLOCK_TAG.source + ")"));
+        return (function (arr) {
+            var tokens = [];
+            for (i = 0; i < arr.length; i++) {
+                (function (token) {
+                     return token === "" ? 
+                        null : 
+                        tokens.push(token);
+                }(arr[i]));
+            }
+            return tokens;
+        }(templ.split(new RegExp("(" + VAR_TAG.source + "|" + 
+                                 BLOCK_TAG.source + "|" + 
+                                 END_BLOCK_TAG.source + ")"))));
     }
 
     // "Lisp in C's clothing." - Douglas Crockford
