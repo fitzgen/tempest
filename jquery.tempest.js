@@ -312,7 +312,8 @@
         node.args = args;
 
         if (node.expectsEndTag === true) {
-            resultsArray = makeNodes(tokens);
+            resultsArray = makeNodes(cdr(tokens));
+
             if (resultsArray[2] !== undefined) {
                 // The third item in the array returned by makeNodes is 
                 // only defined if the last of the tokens was made in to a 
@@ -326,8 +327,11 @@
             tokens = resultsArray[1];
         }
 
+        // Add the newly created node to the nodes list.
+        nodes = append(node, nodes);
+
         // Continue where we were before the block node.
-        return f(append(node, nodes), cdr(tokens));
+        return f(nodes, cdr(tokens));
     }
 
     // Return the template rendered with the given object(s) as a jQuery 
