@@ -31,10 +31,10 @@
         
         // TAG REGULAR EXPRESSIONS
         // Overwrite these if you want, but don't blame me when stuff goes wrong.
-        OPEN_VAR_TAG = /\{\{[ ]*?/g,
-        CLOSE_VAR_TAG = /[ ]*?\}\}/g,
-        OPEN_BLOCK_TAG = /\{%[ ]*?/g,
-        CLOSE_BLOCK_TAG = /[ ]*?%\}/g,
+        OPEN_VAR_TAG = /\{\{[\s]*?/g,
+        CLOSE_VAR_TAG = /[\s]*?\}\}/g,
+        OPEN_BLOCK_TAG = /\{%[\s]*?/g,
+        CLOSE_BLOCK_TAG = /[\s]*?%\}/g,
 
         // Probably, you don't want to mess with these, as they are built from 
         // the ones above.
@@ -43,7 +43,7 @@
                              CLOSE_VAR_TAG.source, "g"),
 
         BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source + 
-                               "[\\w]+?[ ]+?[\\w\\-\\.]*?" + 
+                               "[\\w]+?(?:[ ]+?[\\w\\-\\.]*?)*?" + 
                                CLOSE_BLOCK_TAG.source, "g"),
 
         END_BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source + 
@@ -107,13 +107,13 @@
     // PRIVATE FUNCTIONS
 
     function isBlockTag(token) {
-        return BLOCK_TAG.test(token);
+        return token.search(BLOCK_TAG) !== -1;
     }
     function isEndTag(token) {
-        return END_BLOCK_TAG.test(token);
+        return token.search(END_BLOCK_TAG) !== -1;
     }
     function isVarTag(token) {
-        return VAR_TAG.test(token);
+        return token.search(VAR_TAG) !== -1;
     }
 
     function strip(str) {
@@ -260,7 +260,7 @@
                        arguments.callee(append(makeVarNode(token), nodes), cdr(tokens)) :
                    isBlockTag(token) ? 
                        makeBlockNode(nodes, tokens, arguments.callee) :
-                   // else
+                   // Else assume it is a text node.
                        arguments.callee(append(makeTextNode(token), nodes), cdr(tokens));
                    
         }([], tokens));
@@ -270,19 +270,17 @@
     // type of block node, and any arguments that were passed to the block
     // node if they exist.
     function makeBits(blockToken) {
-        var split = blockToken.replace(OPEN_BLOCK_TAG, "")
-                              .replace(CLOSE_BLOCK_TAG, "")
-                              .split(/[ ]+?/),
-            bits = [];
-
-        // Remove empty strings and strip whitespace.
-        for (i = 0; i < split.length; i++) {
-            (function (peice) {
-                var bit = strip(peice);
-                return bit === "" ? null : bits.push(bit);
-            }(split[i]));
-        }
-        return bits;
+        return (function (bits, split) {
+            // Remove empty strings and strip whitespace.
+            for (i = 0; i < split.length; i++) {
+                (function (bit) {
+                    return bit === "" ? null : bits.push(bit);
+                }(strip(split[i])));
+            }
+            return bits;
+        }([], blockToken.replace(OPEN_BLOCK_TAG, "")
+                        .replace(CLOSE_BLOCK_TAG, "")
+                        .split(/[\s]+?/)));
     }
 
     // Create a block tag's node by hijacking the "makeNodes" function 
