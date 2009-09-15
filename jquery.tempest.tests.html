@@ -88,12 +88,14 @@
                            {name:"OJ and Brittany", message:"Oops I did it again"},];
                 var text = $.tempest("template-message", arr).text();
 
-                var expected = [];
-                for (i = 0; i < arr.length; i++){
+                var expected = [], i = 0;
+                while (i < arr.length) {
                     expected.push($.tempest("template-message", arr[i]).text());
+                    i++;
                 }
                 expected = expected.join("");
-                return text == expected;
+
+                return text === expected;
             }
             fireunit.ok(testManyRenderedValue(), "The text of the rendered template is correct with array of objs");
 
