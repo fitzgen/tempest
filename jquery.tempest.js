@@ -362,8 +362,13 @@
             });
         });
 
-        // Return the joined templates as jQuery objects
-        return $(lines.join(""));
+        // Return the joined templates as jQuery objects if it appears to start
+        // with an HTML tag, otherwise just return the string itself.
+        return (function (str) {
+            return str.charAt(0) === "<" ?
+                $(str) :
+                str;
+        }(lines.join("")));
     }
 
     // EXPOSE PRIVATE FUNCTIONS FOR TESTING
