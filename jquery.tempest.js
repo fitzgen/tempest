@@ -74,11 +74,12 @@
                         subNodes = this.subNodes;
 
                     // Check the truthiness of the argument.
-                    if (!!this.args[0]) {
+                    if (!!context[this.args[0]]) {
                         $.each(subNodes, function (i, node) {
                             rendered_nodes.push(node.render(context));
                         });
                     } 
+
                     return rendered_nodes.join("");
                 }
             }
@@ -310,9 +311,10 @@
         }
 
         node.args = args;
+        tokens = cdr(tokens);
 
         if (node.expectsEndTag === true) {
-            resultsArray = makeNodes(cdr(tokens));
+            resultsArray = makeNodes(tokens);
 
             if (resultsArray[2] !== undefined) {
                 // The third item in the array returned by makeNodes is 
@@ -331,7 +333,7 @@
         nodes = append(node, nodes);
 
         // Continue where we were before the block node.
-        return f(nodes, cdr(tokens));
+        return f(nodes, tokens);
     }
 
     // Return the template rendered with the given object(s) as a jQuery 

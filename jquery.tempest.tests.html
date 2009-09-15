@@ -175,12 +175,14 @@
             fireunit.ok(testToHTML(), "If an object is passed as a variable, render it with the toHTML method if it exists.");
 
             function testIfStatementTrue() {
-                return $.tempest("if-template", { t: true }).text() === "hello world";
+                var obj = { t:true };
+                return $.tempest("if-template", obj).text() === "hello world";
             }
             fireunit.ok(testIfStatementTrue(), "If statements that are evaluated to true are working as expected");
 
             function testIfStatementTrue() {
-                return $.tempest("if-template", { t: false }).text() === "hello ";
+                var obj = { t:false };
+                return $.tempest("if-template", obj).text() === "hello ";
             }
             fireunit.ok(testIfStatementTrue(), "If statements that are evaluated to false are working as expected");
 
