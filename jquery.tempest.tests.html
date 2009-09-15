@@ -13,7 +13,8 @@
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
         <script type="text/javascript">
-            tempestPrivates = {};
+            // Tell tempest we want to test the private methods.
+            testTempestPrivates = true;
         </script>
         <script type="text/javascript" src="jquery.tempest.js"></script>
         <script type="text/javascript">
@@ -188,35 +189,35 @@
             }
             fireunit.ok(testIfStatementTrue(), "If statements that are evaluated to false are working as expected");
 
-            // Private functions from window.tempestPrivates ------------------------------------------
+            // Private functions from $.tempest._test ------------------------------------------
 
             fireunit.ok((function () {
-                return tempestPrivates.isBlockTag("{% if var %}");
+                return $.tempest._test.isBlockTag("{% if var %}");
             }()), "isBlockTag recognizes block tags.");
             fireunit.ok((function () {
-                return tempestPrivates.isBlockTag("{%if var%}");
+                return $.tempest._test.isBlockTag("{%if var%}");
             }()), "isBlockTag recognizes block tags w/out spaces.");
 
             fireunit.ok((function () {
-                return tempestPrivates.isEndTag("{% endif %}");
+                return $.tempest._test.isEndTag("{% endif %}");
             }()), "isEndTag recognizes end tags.");
             fireunit.ok((function () {
-                return tempestPrivates.isEndTag("{%endif%}");
+                return $.tempest._test.isEndTag("{%endif%}");
             }()), "isEndTag recognizes end tags w/out spaces.");
 
             fireunit.ok((function () {
-                return tempestPrivates.isVarTag("{{ var }}");
+                return $.tempest._test.isVarTag("{{ var }}");
             }()), "isVarTag recognizes variable tags.");
             fireunit.ok((function () {
-                return tempestPrivates.isVarTag("{{var}}");
+                return $.tempest._test.isVarTag("{{var}}");
             }()), "isVarTag recognizes variable tags w/out spaces.");
 
             fireunit.ok((function () {
-                return tempestPrivates.cleanVal($("p")) === tempestPrivates.jQueryToString($("p"));
+                return $.tempest._test.cleanVal($("p")) === $.tempest._test.jQueryToString($("p"));
             }()), "cleanVal renders jQuery objects correctly");
 
             fireunit.ok((function () {
-                return tempestPrivates.cleanVal({ 
+                return $.tempest._test.cleanVal({ 
                     toHTML: function () { 
                         return "foobar"; 
                     }
@@ -224,15 +225,15 @@
             }()), "cleanVal calls toHTML on an object if it exists");
 
             fireunit.ok((function () {
-                return tempestPrivates.cleanVal({}) === ({}).toString();
+                return $.tempest._test.cleanVal({}) === ({}).toString();
             }()), "cleanVal calls toString on an object if toHTML does not exist.");
 
             fireunit.ok((function () {
-                return tempestPrivates.cleanVal("hello") === "hello";
+                return $.tempest._test.cleanVal("hello") === "hello";
             }()), "cleanVal leaves all other input alone.");
 
             fireunit.ok((function () {
-                return tempestPrivates.getValFromObj("obj.child", {
+                return $.tempest._test.getValFromObj("obj.child", {
                     obj: {
                         child: "hello"
                     }
@@ -240,7 +241,7 @@
             }()), "getValFromObj can access children/attributes.");
 
             fireunit.ok((function () {
-                return tempestPrivates.getValFromObj("obj.fake", {
+                return $.tempest._test.getValFromObj("obj.fake", {
                     obj: {
                         child: "hello"
                     }
@@ -248,81 +249,81 @@
             }()), "getValFromObj returns an empty string if the attribute is not found.");
 
             fireunit.ok((function () {
-                return tempestPrivates.jQueryToString($("<p>Hello</p>")) === "<p>Hello</p>";
+                return $.tempest._test.jQueryToString($("<p>Hello</p>")) === "<p>Hello</p>";
             }()), "jQueryToString works correctly");
 
             fireunit.ok((function () {
                 var o = { t: true };
-                var made = tempestPrivates.makeObj(o);
+                var made = $.tempest._test.makeObj(o);
                 return o !== made && o.t === made.t;
             }()), "makeObj creates a new element, but they share the same attributes");
 
             // TODO: storedTemplates
 
             fireunit.ok((function () {
-                return tempestPrivates.chooseTemplate("if-template") ===
+                return $.tempest._test.chooseTemplate("if-template") ===
                     "<li>hello {% if t %}world{% endif %}</li>";
             }()), "chooseTemplate recognizes stored templates");
 
             fireunit.ok((function () {
-                return tempestPrivates.chooseTemplate("<li> ONE TIME USE </li>") ===
+                return $.tempest._test.chooseTemplate("<li> ONE TIME USE </li>") ===
                     "<li> ONE TIME USE </li>";
             }()), "chooseTemplate returns unrecognized template keys as one-time-use templates.");
 
             fireunit.ok((function () {
-                return tempestPrivates.isArray([1,3,5,6]) === true;
+                return $.tempest._test.isArray([1,3,5,6]) === true;
             }()), "isArray recognizes arrays.");
 
             fireunit.ok((function () {
-                return tempestPrivates.isArray({length: 2, 0:1, 1:2}) === false;
+                return $.tempest._test.isArray({length: 2, 0:1, 1:2}) === false;
             }()), "isArray isn't fooled by look-a-like objects.");
 
             // TODO: renderEach
 
             fireunit.ok((function () {
-                return tempestPrivates.tokenize("<li>{% if t %}{{ var }}{% endif %} word</li>").length === 5;
+                return $.tempest._test.tokenize("<li>{% if t %}{{ var }}{% endif %} word</li>").length === 5;
             }()), "tokenize splits a template in to the proper amount of chunks.");
 
             fireunit.ok((function () {
-                return tempestPrivates.tokenize("<li>{% if t %}{{ var }}{% endif %} word</li>")[0] === "<li>";
+                return $.tempest._test.tokenize("<li>{% if t %}{{ var }}{% endif %} word</li>")[0] === "<li>";
             }()), "tokenize splits the first token from the template string correctly.");
 
             fireunit.ok((function () {
-                return tempestPrivates.cdr([1,2,3]).length === 2;
+                return $.tempest._test.cdr([1,2,3]).length === 2;
             }()), "cdr returns an array of length one shorter than the original.");
 
             fireunit.ok((function () {
-                var rest = tempestPrivates.cdr([1,2,3]);
+                var rest = $.tempest._test.cdr([1,2,3]);
                 return rest[0] === 2 && rest[1] === 3;
             }()), "cdr returns the proper values for the array of everything but the first item.");
 
             fireunit.ok((function () {
-                var arr = tempestPrivates.append(4, [1,2,3]);
-                return tempestPrivates.isArray(arr) && arr.length === 4 && arr[3] === 4;
+                var arr = $.tempest._test.append(4, [1,2,3]);
+                return $.tempest._test.isArray(arr) && arr.length === 4 && arr[3] === 4;
             }()), "append returns a new array with the item appended.");
 
             fireunit.ok((function () {
-                var node = tempestPrivates.makeVarNode("{{ var }}");
+                var node = $.tempest._test.makeVarNode("{{ var }}");
                 return node.name === "var" && typeof(node.render) === "function";
             }()), "makeVarNode creates an object with the proper name and a render function");
 
             fireunit.ok((function () {
-                var node = tempestPrivates.makeVarNode("{{ var }}");
+                var node = $.tempest._test.makeVarNode("{{ var }}");
                 return node.render({ "var": "hello" }) === "hello" && node.render({}) === "";
             }()), "nodes made with makeVarNode render properly.");
 
             fireunit.ok((function () {
-                var node = tempestPrivates.makeTextNode("Hello World");
+                var node = $.tempest._test.makeTextNode("Hello World");
                 return node.text === "Hello World" && typeof(node.render) === "function";
             }()), "makeTextNode creates an object with a text attribute and a render function");
 
             fireunit.ok((function () {
-                var node = tempestPrivates.makeTextNode("Hello World");
+                var node = $.tempest._test.makeTextNode("Hello World");
                 return node.render({}) === "Hello World";
             }()), "nodes made with makeTextNode render properly");
 
             fireunit.ok((function () {
-                var results = tempestPrivates.makeNodes(["Hello World", "{{ var }}", "woo haa"]);
+                var results = $.tempest._test.makeNodes(["Hello World", "{{ var }}", "woo haa"]);
                 var nodes = results[0];
                 return typeof(nodes[0].text) === "string" &&
                        typeof(nodes[1].name) === "string" && 
@@ -330,7 +331,7 @@
             }()), "makeNodes creates the proper types of nodes from the bits");
 
             fireunit.ok((function () {
-                var results = tempestPrivates.makeNodes(["Hello World", "{{ var }}", "woo haa"]);
+                var results = $.tempest._test.makeNodes(["Hello World", "{{ var }}", "woo haa"]);
                 var tokens = results[1];
                 return tokens.length === 0 && results[2] === true;
             }()), "makeNodes returns no more tokens in its results when no" +
@@ -338,14 +339,14 @@
                   " true, because makeNodes reached the end of the tokens.");
 
             fireunit.ok((function () {
-                var results = tempestPrivates.makeNodes(["{% endif %}", "Hello World", "{{ var }}"]);
+                var results = $.tempest._test.makeNodes(["{% endif %}", "Hello World", "{{ var }}"]);
                 var nodes = results[0]
                 var tokens = results[1];
                 return tokens.length === 2 && nodes.length === 0;
             }()), "makeNodes returns the rest of the tokens when an endblock is located.");
 
             fireunit.ok((function () {
-                var bits = tempestPrivates.makeBits("{% if var %}");
+                var bits = $.tempest._test.makeBits("{% if var %}");
                 return bits[0] === "if" && bits[1] === "var" && bits.length === 2;
             }()), "makeBits creates the proper array of bits from a block tag.");
 
@@ -353,7 +354,7 @@
             // TODO: renderToJQ
 
             fireunit.ok((function () {
-                return tempestPrivates.strip("  hello world   ") === "hello world";
+                return $.tempest._test.strip("  hello world   ") === "hello world";
             }()), "strip removes whitespace from front and back");
 
             // evaluate all the tests and tally up results.

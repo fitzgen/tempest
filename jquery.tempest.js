@@ -371,36 +371,6 @@
         }(lines.join("")));
     }
 
-    // EXPOSE PRIVATE FUNCTIONS FOR TESTING
-    if (window.tempestPrivates) {
-        // Make it easier to attach the private methods methods to the public
-        // object.
-        function a(name, fn) {
-            window.tempestPrivates[name] = fn;
-        }
-        a("isBlockTag", isBlockTag);
-        a("isEndTag", isEndTag);
-        a("isVarTag", isVarTag);
-        a("cleanVal", cleanVal);
-        a("getValFromObj", getValFromObj);
-        a("jQueryToString", jQueryToString);
-        a("makeObj", makeObj);
-        a("storedTemplates", storedTemplates);
-        a("chooseTemplate", chooseTemplate);
-        a("isArray", isArray);
-        a("renderEach", renderEach);
-        a("tokenize", tokenize);
-        a("cdr", cdr);
-        a("append", append);
-        a("makeVarNode", makeVarNode);
-        a("makeTextNode", makeTextNode);
-        a("makeNodes", makeNodes);
-        a("makeBits", makeBits);
-        a("makeBlockNode", makeBlockNode);
-        a("renderToJQ", renderToJQ);
-        a("strip", strip);
-    }
-
     // EXTEND JQUERY OBJECT
     $.extend({
         tempest: function () {
@@ -444,6 +414,38 @@
             }
         }
     });
+
+    // EXPOSE PRIVATE FUNCTIONS FOR TESTING
+    if (window.testTempestPrivates === true) {
+        $.tempest._test = {};
+
+        // Make it easier to attach the private methods methods to the public
+        // object.
+        function a(name, fn) {
+            $.tempest._test[name] = fn;
+        }
+        a("isBlockTag", isBlockTag);
+        a("isEndTag", isEndTag);
+        a("isVarTag", isVarTag);
+        a("cleanVal", cleanVal);
+        a("getValFromObj", getValFromObj);
+        a("jQueryToString", jQueryToString);
+        a("makeObj", makeObj);
+        a("storedTemplates", storedTemplates);
+        a("chooseTemplate", chooseTemplate);
+        a("isArray", isArray);
+        a("renderEach", renderEach);
+        a("tokenize", tokenize);
+        a("cdr", cdr);
+        a("append", append);
+        a("makeVarNode", makeVarNode);
+        a("makeTextNode", makeTextNode);
+        a("makeNodes", makeNodes);
+        a("makeBits", makeBits);
+        a("makeBlockNode", makeBlockNode);
+        a("renderToJQ", renderToJQ);
+        a("strip", strip);
+    }
 
     // GET ALL TEXTAREA TEMPLATES ON READY
     $(document).ready(function () {
