@@ -28,6 +28,7 @@
 (function ($) {
     // PRIVATE VARIABLES
     var templateCache = {},
+        renderedCache = {},
         
         // TAG REGULAR EXPRESSIONS
         // Overwrite these if you want, but don't blame me when stuff goes wrong.
@@ -385,8 +386,27 @@
                        typeof(args[0]) === "string" && 
                        typeof(args[1]) === "object") {
 
-                // Render an object or objects to a template.
-                return renderToJQ(args[0], args[1]);
+                // Render an object or objects to a template, if it is not in
+                // the cache. If an object is an instance of jQuery, clone it
+                // so that elements don't randomly disappear when someone
+                // decides to append the object and it is the same object they
+                // originally created.
+                return (function (cached) {
+                    return cached === undefined ?
+                        (function () {
+                            var result = renderedCache[args[0] + "|" +
+                                $.param(args[1])] = renderToJQ(args[0],
+                                    args[1]);
+                            return result instanceof $ ?
+                                result.clone() :
+                                result;
+                        }()) :
+                        (function () {
+                            return cached instanceof $ ?
+                                cached.clone() :
+                                cached;
+                        }());
+                }(renderedCache[args[0] + "|" + $.param(args[1])]));
 
             } else if (args.length === 1 && typeof(args[0]) === "string") {
 
