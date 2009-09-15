@@ -189,6 +189,18 @@
             }
             fireunit.ok(testIfStatementTrue(), "If statements that are evaluated to false are working as expected");
 
+            fireunit.ok((function () {
+                $.tempest.tags.dumb = {
+                    expectsEndTag: false,
+                    render: function (context) {
+                        return "DUMMY TAG";
+                    }
+                }
+                var text = $.tempest("{% dumb %}", {});
+                $.tempest.tags.dumb = undefined;
+                return text === "DUMMY TAG";
+            }()), "Testing extension of tag object with custom tags.");
+
             // Private functions from $.tempest._test ------------------------------------------
 
             fireunit.ok((function () {
