@@ -415,6 +415,9 @@
         }
     });
 
+    // EXPOSE BLOCK_NODES OBJECT TO ALLOW EXTENSION WITH CUSTOM TAGS
+    $.tempest.tags = BLOCK_NODES;
+
     // EXPOSE PRIVATE FUNCTIONS FOR TESTING
     if (window.testTempestPrivates === true) {
         $.tempest._test = {};
