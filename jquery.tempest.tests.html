@@ -388,8 +388,9 @@
 
                 if (count < 1000) {
                     var start = new Date().getTime();
-                    $.tempest("<li><em>Whoah a one time use {{thing}}!</em></li>", {
-                        thing: "test"
+                    $.tempest("<li><em>Whoah a one time use {% if t %}{{thing}}{% endif %}!</em></li>", {
+                        thing: "test",
+                        t: true
                     });
                     var end = new Date().getTime();
                     var delta = end - start;
