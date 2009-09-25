@@ -472,7 +472,7 @@
 
     // GET ALL TEXTAREA TEMPLATES ON READY
     $(document).ready(function () {
-        $("textarea.tempest-template").each(function (obj) {
+        $(".tempest-template").each(function (obj) {
             templateCache[$(this).attr('title')] = $(this).val()
                                                           .replace(/^\s+/g, "")
                                                           .replace(/\s+$/g, "")
