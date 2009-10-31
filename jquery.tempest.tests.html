@@ -166,6 +166,17 @@
                 return rendered.text() === "object attribute";
             }
             fireunit.ok(testAccessObjectAttrs(), "Access a passed object's attributes");
+            
+            fireunit.ok((function () {
+                var tmpl = "My site is: {{ site.name }}";
+                var rendered = $.tempest(tmpl, {"site": {"name":"my site"}});
+                console.log(rendered);
+                var first = rendered === "My site is: my site";
+                var rendered = $.tempest(tmpl, {"site": {"name":"your site"}});
+                console.log(rendered);
+                var second = rendered === "My site is: your site";
+                return first && second;
+            }()), "The dot notation/attr look up works with different values but same template.");
 
             function testToHTML() {
                 var obj = {
