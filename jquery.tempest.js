@@ -22,7 +22,6 @@
 // THE SOFTWARE.
 
 // JSLint
-/*jslint white: true, onevar: true, browser: true, undef: true, nomen: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
 "use strict";
 
 (function ($) {
