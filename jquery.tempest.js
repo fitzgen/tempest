@@ -104,6 +104,18 @@
             }
         };
 
+    // CUSTOM ERRORS
+
+    function TemplateSyntaxError(message) {
+        if (!(this instanceof TemplateSyntaxError)) {
+            return new TemplateSyntaxError(message);
+        }
+        this.message = message;
+        return this;
+    }
+    TemplateSyntaxError.prototype = new SyntaxError();
+    TemplateSyntaxError.prototype.name = "TemplateSyntaxError";
+
     // PRIVATE FUNCTIONS
 
     function isBlockTag(token) {
@@ -303,10 +315,7 @@
         // Ensure that the type of block tag is one that is defined in 
         // BLOCK_NODES
         if (node === undefined) {
-            throw ({
-                name: "TemplateSyntaxError",
-                message: "Unkown Block Tag."
-            });
+            throw new TemplateSyntaxError("Unknown Block Tag.");
         }
 
         node.args = args;
@@ -319,10 +328,9 @@
                 // The third item in the array returned by makeNodes is 
                 // only defined if the last of the tokens was made in to a 
                 // node and it wasn't an end-block tag.
-                throw ({
-                    name: "TemplateSyntaxError",
-                    message: "A block tag was expecting an ending tag but it was not found."
-                });
+                throw new TemplateSyntaxError(
+                    "A block tag was expecting an ending tag but it was not found."
+                );
             }
             node.subNodes = resultsArray[0];
             tokens = resultsArray[1];
@@ -349,10 +357,9 @@
             // that not all tokens were rendered because there are more 
             // end-block tagss than block tags that expect an end.
             if (resultsArray[1].length !== 0) {
-                throw ({
-                    name: "TemplateSyntaxError",
-                    message: "An unexpected end tag was found."
-                });
+                throw new TemplateSyntaxError(
+                    "An unexpected end tag was found."
+                );
             }
 
             // Render each node and push it to the lines.
@@ -406,11 +413,11 @@
 
             } else {
 
-                // Raise an exception because the arguments did not match the API.
-                throw ({
-                    name: "InputError",
-                    message: "jQuery.tempest can't handle the given arguments."
-                });
+                // Raise an exception because the arguments did not match the
+                // API.
+                throw new TypeError(
+                    "jQuery.tempest can't handle the given arguments."
+                );
 
             }
         }
@@ -454,10 +461,7 @@
     // GET ALL TEXTAREA TEMPLATES ON READY
     $(document).ready(function () {
         $(".tempest-template").each(function (obj) {
-            templateCache[$(this).attr('title')] = $(this).val()
-                                                          .replace(/^\s+/g, "")
-                                                          .replace(/\s+$/g, "")
-                                                          .replace(/[\n\r]+/g, "");
+            templateCache[$(this).attr('title')] = strip($(this).val().replace(/[\n\r]+/g, " "));
             $(this).remove();
         });
     });
