@@ -461,7 +461,7 @@
     // GET ALL TEXTAREA TEMPLATES ON READY
     $(document).ready(function () {
         $(".tempest-template").each(function (obj) {
-            templateCache[$(this).attr('title')] = strip($(this).val().replace(/[\n\r]+/g, " "));
+            templateCache[$(this).attr('title')] = strip(($(this).val() || $(this).html()).replace(/[\n\r]+/g, " "));
             $(this).remove();
         });
     });
