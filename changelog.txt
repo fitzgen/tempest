@@ -1,4 +1,20 @@
 ===============================================================================
+Tempest jQuery Templating Plugin 0.3
+===============================================================================
+
+New Features
+-------------------------------------------------------------------------------
+
+* Store templates in any type of element (as long as it has a
+  class="tempest-template") instead of only textareas.
+
+* Simple boolean logic.
+
+* Create custom tags, see the README at http://github.com/fitzgen/tempest
+
+* All known bugs and issues fixed.
+
+===============================================================================
 Tempest jQuery Templating Plugin 0.2
 ===============================================================================
 
