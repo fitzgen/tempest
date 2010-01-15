@@ -118,6 +118,53 @@
 
     // PRIVATE FUNCTIONS
 
+    // Some browsers don't return the grouped part of the RegExp with the array,
+    // so we must accomodate them.
+    var split = (function () {
+        if ("abc".split(/(b)/).length === 3) {
+            return function (str, delimiter) {
+                return String.prototype
+                             .split
+                             .call(str, delimiter);
+            };
+        } else {
+            return function (str, delimiter) {
+                if (Object.prototype
+                          .toString
+                          .call(delimiter) === "[object RegExp]") {
+                    var regex = delimiter.ignoreCase ?
+                        new RegExp(delimiter.source, "gi") :
+                        new RegExp(delimiter.source, "g"),
+                    match,
+                    match_str = "",
+                    arr = [],
+                    i,
+                    len = str.length;
+
+                    for (i = 0; i < len; i++) {
+                        match_str += str.charAt(i);
+                        match = match_str.match(regex);
+                        if (match !== null && match.length > 0) {
+                            arr.push(match_str.replace(match[0], ""));
+                            arr.push(match[0]);
+                            match_str = "";
+                        }
+                    }
+                    
+                    if (match_str !== "") {
+                        arr.push(match_str);
+                    }
+                    
+                    return arr;
+                } else {
+                    return String.prototype
+                                 .split
+                                 .call(str, delimiter);
+                }
+            };
+        }
+    }());
+
     function isBlockTag(token) {
         return token.search(BLOCK_TAG) !== -1;
     }
@@ -150,7 +197,7 @@
     // Traverse a path of an obj from a string representation, 
     // for example "object.child.attr".
     function getValFromObj(str, obj) {
-        var path = str.split("."),
+        var path = split(str, "."),
             val = obj[path[0]],
             i;
         for (i = 1; i < path.length; i++) {
@@ -227,9 +274,9 @@
                 }(arr[i]));
             }
             return tokens;
-        }(templ.split(new RegExp("(" + VAR_TAG.source + "|" + 
-                                 BLOCK_TAG.source + "|" + 
-                                 END_BLOCK_TAG.source + ")"))));
+        }(split(templ, new RegExp("(" + VAR_TAG.source + "|" + 
+                                  BLOCK_TAG.source + "|" + 
+                                  END_BLOCK_TAG.source + ")"))));
     }
 
     // "Lisp in C's clothing." - Douglas Crockford
@@ -290,9 +337,9 @@
                 }(strip(split[i])));
             }
             return bits;
-        }([], blockToken.replace(OPEN_BLOCK_TAG, "")
-                        .replace(CLOSE_BLOCK_TAG, "")
-                        .split(/[\s]+?/)));
+        }([], split(blockToken.replace(OPEN_BLOCK_TAG, "")
+                              .replace(CLOSE_BLOCK_TAG, ""),
+                   /[\s]+?/)));
     }
 
     // Create a block tag's node by hijacking the "makeNodes" function 
