@@ -41,7 +41,7 @@ MAILING LIST
 ============
 
 To get involved, ask questions, or recieve help with Tempest, you can email the 
-Tempest mailing list: *tempest@librelist.com*
+Tempest mailing list: **tempest@librelist.com**
 
 API
 ===
