@@ -37,6 +37,12 @@ The other big thing, for me, is that iteration is handled seamlessly. Just pass
 an array of objects to tempest instead of a single object and it will return a
 jquery element array.
 
+MAILING LIST
+============
+
+To get involved, ask questions, or recieve help with Tempest, you can email the 
+Tempest mailing list: *tempest@librelist.com*
+
 API
 ===
 
