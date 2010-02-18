@@ -10,6 +10,11 @@
         <textarea class="tempest-template" title="if-template" style="display:none;">
             <li>hello {% if t %}world{% endif %}</li>
         </textarea>
+        <textarea class="tempest-template" title="for-template" style="display:none;">
+            {% for person in people %}
+                <li>{{ person.name }}</li>
+            {% endfor %}
+        </textarea>
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
         <script type="text/javascript">
@@ -30,7 +35,7 @@
             fireunit.ok(testStorageFromTextarea(), "Access stored templates that were inside textareas");
 
             function testGetAllTemplatesLength(){
-                return $.tempest().length == 3;
+                return $.tempest().length == 4;
             }
             fireunit.ok(testGetAllTemplatesLength(), "Length of $.tempest() is equal to number of textarea templates pre-defined");
 
@@ -211,6 +216,18 @@
                 $.tempest.tags.dumb = undefined;
                 return text === "DUMMY TAG";
             }()), "Testing extension of tag object with custom tags.");
+
+            fireunit.ok((function () {
+                var context = {
+                    people: [{name: "Nick"}, {name: "Dave"}, {name: "John"}]
+                };
+
+                // Append to <ul> because sometimes text nodes get up in there
+                // and mess up the count of html nodes rendered.
+                return $("<ul>").append(
+                    $.tempest("for-template", context)
+                ).children().length === context.people.length;
+            }()), "Test for tag is working correctly.");
 
             // Private functions from $.tempest._test ------------------------------------------
 
