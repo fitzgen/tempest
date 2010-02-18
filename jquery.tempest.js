@@ -421,7 +421,7 @@
             return str.charAt(0) === "<" ?
                 $(str) :
                 str;
-        }(lines.join("")));
+        }(strip(lines.join(""))));
     }
 
     // EXTEND JQUERY OBJECT
