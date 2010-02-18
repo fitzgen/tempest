@@ -66,6 +66,41 @@
         // * Every block tag should have a "render" method that takes one
         //   argument: a context object. It should return a string.
         BLOCK_NODES = {
+            "for": {
+                expectsEndTag: true,
+                render: function (context) {
+                    var args = this.args,
+                    subNodes = this.subNodes,
+                    renderedNodes = [],
+                    i, itemName, arrName, arr, forContext, tmpObj;
+
+                    if (args.length === 3 && args[1] === "in") {
+                        itemName = args[0];
+                        arrName = args[2];
+                        arr = getValFromObj(arrName, context);
+
+                        for (i = 0; i < arr.length; i++) {
+                            tmpObj = {};
+                            tmpObj[itemName] = arr[i];
+                            tmpObj._index = i;
+                            forContext = $.extend(true, {}, context, tmpObj);
+
+                            $.each(subNodes, function (j, node) {
+                                renderedNodes.push(
+                                    node.render(forContext)
+                                );
+                            });
+                        }
+
+                        return renderedNodes.join("");
+                    }
+                    else {
+                        throw new TemplateSyntaxError(
+                            "Bad for tag syntax. Use {% for <item> in <array> %}"
+                        );
+                    }
+                }
+            },
             "if": {
                 expectsEndTag: true,
                 render: function (context) {
