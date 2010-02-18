@@ -2,17 +2,17 @@
 // ================================
 //
 // Copyright (c) 2009 Nick Fitzgerald - http://fitzgeraldnick.com/
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,7 +27,7 @@
 (function ($) {
     // PRIVATE VARIABLES
     var templateCache = {},
-        
+
         // TAG REGULAR EXPRESSIONS
         // Overwrite these if you want, but don't blame me when stuff goes wrong.
         OPEN_VAR_TAG = /\{\{[\s]*?/g,
@@ -35,35 +35,35 @@
         OPEN_BLOCK_TAG = /\{%[\s]*?/g,
         CLOSE_BLOCK_TAG = /[\s]*?%\}/g,
 
-        // Probably, you don't want to mess with these, as they are built from 
+        // Probably, you don't want to mess with these, as they are built from
         // the ones above.
-        VAR_TAG = new RegExp(OPEN_VAR_TAG.source + 
-                             "[\\w\\-\\.]+?" + 
+        VAR_TAG = new RegExp(OPEN_VAR_TAG.source +
+                             "[\\w\\-\\.]+?" +
                              CLOSE_VAR_TAG.source, "g"),
 
-        BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source + 
-                               "[\\w]+?(?:[ ]+?[\\w\\-\\.]*?)*?" + 
+        BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source +
+                               "[\\w]+?(?:[ ]+?[\\w\\-\\.]*?)*?" +
                                CLOSE_BLOCK_TAG.source, "g"),
 
-        END_BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source + 
-                                   "end[\\w]*?" + 
+        END_BLOCK_TAG = new RegExp(OPEN_BLOCK_TAG.source +
+                                   "end[\\w]*?" +
                                    CLOSE_BLOCK_TAG.source, "g"),
 
-        // All block tags stored in here. Tags have a couple things to work 
+        // All block tags stored in here. Tags have a couple things to work
         // with:
         //
-        // * "args" property is set before render: 
+        // * "args" property is set before render:
         //     - Example: {% tag_type arg1 arg2 foo bar %}
-        //         * The "args" property would be set to 
-        //               ["arg1", "arg2", "foo", "bar"] 
-        //           in this example. The tag's render method could look them 
-        //           up in the context object, or could do whatever it wanted 
+        //         * The "args" property would be set to
+        //               ["arg1", "arg2", "foo", "bar"]
+        //           in this example. The tag's render method could look them
+        //           up in the context object, or could do whatever it wanted
         //           to do with it.
-        // * "subNodes" property which is an array of all the nodes between 
+        // * "subNodes" property which is an array of all the nodes between
         //   the block tag and it's corresponding {% end... %} tag
-        //     - NOTE: This property is only set for a block if it has the 
+        //     - NOTE: This property is only set for a block if it has the
         //       "expectsEndTag" property set to true.
-        // * Every block tag should have a "render" method that takes one 
+        // * Every block tag should have a "render" method that takes one
         //   argument: a context object. It should return a string.
         BLOCK_NODES = {
             "if": {
@@ -77,7 +77,7 @@
                         $.each(subNodes, function (i, node) {
                             rendered_nodes.push(node.render(context));
                         });
-                    } 
+                    }
 
                     return rendered_nodes.join("");
                 }
@@ -150,11 +150,11 @@
                             match_str = "";
                         }
                     }
-                    
+
                     if (match_str !== "") {
                         arr.push(match_str);
                     }
-                    
+
                     return arr;
                 } else {
                     return String.prototype
@@ -183,7 +183,7 @@
     function cleanVal(val) {
         if (val instanceof $) {
             return jQueryToString(val);
-        } else if (!isArray(val) && typeof(val) === "object") { 
+        } else if (!isArray(val) && typeof(val) === "object") {
             if (typeof(val.toHTML) === "function") {
                 return cleanVal(val.toHTML());
             } else {
@@ -194,7 +194,7 @@
         }
     }
 
-    // Traverse a path of an obj from a string representation, 
+    // Traverse a path of an obj from a string representation,
     // for example "object.child.attr".
     function getValFromObj(str, obj) {
         var path = split(str, "."),
@@ -238,7 +238,7 @@
         return cache;
     }
 
-    // Determine if the string is a key to a stored template or a 
+    // Determine if the string is a key to a stored template or a
     // one-time-use template.
     function chooseTemplate(str) {
         return typeof templateCache[str] === "string" ?
@@ -253,7 +253,7 @@
                      .apply(objToTest) === "[object Array]";
     }
 
-    // Call a rendering function on arrays of objects or just a single 
+    // Call a rendering function on arrays of objects or just a single
     // object seamlessly.
     function renderEach(data, f) {
         return isArray(data) ?
@@ -261,21 +261,21 @@
             f(0, data);
     }
 
-    // Split a template in to tokens which will eventually be converted to 
+    // Split a template in to tokens which will eventually be converted to
     // nodes and then rendered.
     function tokenize(templ) {
         return (function (arr) {
             var tokens = [];
             for (i = 0; i < arr.length; i++) {
                 (function (token) {
-                     return token === "" ? 
-                        null : 
+                     return token === "" ?
+                        null :
                         tokens.push(token);
                 }(arr[i]));
             }
             return tokens;
-        }(split(templ, new RegExp("(" + VAR_TAG.source + "|" + 
-                                  BLOCK_TAG.source + "|" + 
+        }(split(templ, new RegExp("(" + VAR_TAG.source + "|" +
+                                  BLOCK_TAG.source + "|" +
                                   END_BLOCK_TAG.source + ")"))));
     }
 
@@ -284,8 +284,8 @@
         return arr.slice(1);
     }
 
-    // Array.push changes the original array in place and returns the new 
-    // length of the array rather than the the actual array itself. This 
+    // Array.push changes the original array in place and returns the new
+    // length of the array rather than the the actual array itself. This
     // makes it unchainable, which is ridiculous.
     function append(item, list) {
         return list.concat([item]);
@@ -306,22 +306,22 @@
         return node;
     }
 
-    // A recursive function that terminates either when all tokens have 
+    // A recursive function that terminates either when all tokens have
     // been converted to nodes or an end-block tag is found.
     function makeNodes(tokens) {
         return (function (nodes, tokens) {
             var token = tokens[0];
             return tokens.length === 0 ?
-                       [nodes, [], true] : 
-                   isEndTag(token) ? 
+                       [nodes, [], true] :
+                   isEndTag(token) ?
                        [nodes, cdr(tokens)] :
-                   isVarTag(token) ? 
+                   isVarTag(token) ?
                        arguments.callee(append(makeVarNode(token), nodes), cdr(tokens)) :
-                   isBlockTag(token) ? 
+                   isBlockTag(token) ?
                        makeBlockNode(nodes, tokens, arguments.callee) :
                    // Else assume it is a text node.
                        arguments.callee(append(makeTextNode(token), nodes), cdr(tokens));
-                   
+
         }([], tokens));
     }
 
@@ -342,24 +342,24 @@
                    /[\s]+?/)));
     }
 
-    // Create a block tag's node by hijacking the "makeNodes" function 
+    // Create a block tag's node by hijacking the "makeNodes" function
     // until an end-block is found.
     function makeBlockNode(nodes, tokens, f) {
         // Remove the templating syntax and split the type of block tag and
         // its arguments.
         var bits = makeBits(tokens[0]),
 
-            // The type of block tag is the first of the bits, the rest 
+            // The type of block tag is the first of the bits, the rest
             // (if present) are args
             type = bits[0],
             args = cdr(bits),
 
-            // Make the node from the set of block tags that Tempest knows 
+            // Make the node from the set of block tags that Tempest knows
             // about.
             node = makeObj(BLOCK_NODES[type]),
             resultsArray;
 
-        // Ensure that the type of block tag is one that is defined in 
+        // Ensure that the type of block tag is one that is defined in
         // BLOCK_NODES
         if (node === undefined) {
             throw new TemplateSyntaxError("Unknown Block Tag.");
@@ -372,8 +372,8 @@
             resultsArray = makeNodes(tokens);
 
             if (resultsArray[2] !== undefined) {
-                // The third item in the array returned by makeNodes is 
-                // only defined if the last of the tokens was made in to a 
+                // The third item in the array returned by makeNodes is
+                // only defined if the last of the tokens was made in to a
                 // node and it wasn't an end-block tag.
                 throw new TemplateSyntaxError(
                     "A block tag was expecting an ending tag but it was not found."
@@ -390,7 +390,7 @@
         return f(nodes, tokens);
     }
 
-    // Return the template rendered with the given object(s) as a jQuery 
+    // Return the template rendered with the given object(s) as a jQuery
     // object.
     function renderToJQ(str, objects) {
         var template = chooseTemplate(str),
@@ -400,8 +400,8 @@
             var resultsArray = makeNodes(tokenize(template), obj),
                 nodes = resultsArray[0];
 
-            // Check for tokens left over in the results array, this means 
-            // that not all tokens were rendered because there are more 
+            // Check for tokens left over in the results array, this means
+            // that not all tokens were rendered because there are more
             // end-block tagss than block tags that expect an end.
             if (resultsArray[1].length !== 0) {
                 throw new TemplateSyntaxError(
@@ -434,22 +434,22 @@
                 // Return key/template pairs of all stored templates.
                 return storedTemplates();
 
-            } else if (args.length === 2 && 
-                       typeof(args[0]) === "string" && 
+            } else if (args.length === 2 &&
+                       typeof(args[0]) === "string" &&
                        typeof(args[1]) === "object") {
 
                 // Render the supplied template (args[0], template name of
                 // existing or one-time-use template) with the context data
                 // (args[1]).
                 return renderToJQ(args[0], args[1]);
-                
+
             } else if (args.length === 1 && typeof(args[0]) === "string") {
 
                 // Template getter.
                 return templateCache[args[0]];
 
-            } else if (args.length === 2 && 
-                       typeof(args[0]) === "string" && 
+            } else if (args.length === 2 &&
+                       typeof(args[0]) === "string" &&
                        typeof(args[1]) === "string") {
 
                 // Template setter.
