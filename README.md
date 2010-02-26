@@ -9,11 +9,10 @@ clone from http://github.com/fitzgen/tempest/tree/master
 HELLO WORLD
 ===========
 
-    $(document).append(
-        $.tempest("<p>Hello, {{ name }}!</p>", {
-            name: "World"
-        })
-    );
+    var template = "<p>Hello, {{ name }}!</p>";
+    $(document).tempest(template, {
+        name: "World"
+    });
 
 PHILOSOPHY
 ==========
