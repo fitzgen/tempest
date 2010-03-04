@@ -136,6 +136,37 @@ Tempest implements very simple boolean logic. Just if's, no else's:
     });
     // returns jQuery: [ <p>This record is active.</p> ]
 
+For Loops
+---------
+
+Use this syntax:
+
+    <ul>
+    {% for person in people %}
+       <li>{{ person }}</li>
+    {% endfor %}
+    </ul>
+
+DOM Manipulation
+----------------
+
+Replace the inner html (`$(selector).html()`) of a DOM element.
+
+    $(selector).tempest(template, context);
+
+You can use any jquery dom manipulation with tempest:
+
+    // $(selector).append($.tempest(template, context));
+    $(selector).tempest("append", template, context);
+
+    // $(selector).prepend($.tempest(template, context));
+    $(selector).tempest("prepend", template, context);
+
+    // Etc... This works with *all* jQuery methods.
+    $(selector).tempest("before", template, context);
+    $(selector).tempest("after", template, context);
+    $(selector).tempest("replaceWith", template, context);
+
 Write your own template tags
 ----------------------------
 
