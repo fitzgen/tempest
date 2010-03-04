@@ -62,8 +62,8 @@ Getter:
     // returns string: "<li><a href='{{ url }}'>{{ title }}</a></li>"
 
 
-$.tempest will also find all textareas with the class "tempest-template" and
-save them with their "title" attribute as the key they are indexed by once the
+$.tempest will also find all elements with the class "tempest-template" and save
+them with their "title" attribute as the key they are indexed by once the
 $(document).ready() event fires.
 
 For example, assuming this is in the html when $(document).ready() fires:
@@ -77,6 +77,12 @@ that you manually created:
 
     $.tempest("new-post");
     // returns string: "<li class='new'><a href='{{ url }}'>{{ title }}</a></li>"
+
+The two typical elements people use as embedded templates are textareas and
+scripts with wacky types (for example <script type="text/template">, which won't
+be modified by browsers or attempted to be ran as JS). The reason these are
+typically used is that search engines don't index the content inside these two
+elements.
 
 Note: $.tempest will remove the textarea from the DOM after storing the contents
 in the template cache.
