@@ -39,7 +39,7 @@ jquery element array.
 MAILING LIST
 ============
 
-To get involved, ask questions, or recieve help with Tempest, you can email the 
+To get involved, ask questions, or recieve help with Tempest, you can email the
 Tempest mailing list: **tempest@librelist.com**
 
 API
@@ -90,11 +90,11 @@ in the template cache.
 Get all templates Tempest has stored by passing no arguments:
 
     $.tempest();
-    // returns array of pairs: [ 
-    //                           ["post", 
+    // returns array of pairs: [
+    //                           ["post",
     //                            "<li><a href='{{ url }}'>{{ title }}</a></li>"],
-    //                           ["new-post", 
-    //                            "<li class='new'><a href='{{ url }}'>{{ title }}</a></li>"] 
+    //                           ["new-post",
+    //                            "<li class='new'><a href='{{ url }}'>{{ title }}</a></li>"]
     //                         ]
 
 Rendering objects to templates
@@ -102,7 +102,7 @@ Rendering objects to templates
 
 Render an object to an existing template:
 
-    $.tempest("post", { 
+    $.tempest("post", {
         title: "My Blog",
         url: "http://fitzgeraldnick.com/weblog/",
     });
@@ -120,7 +120,7 @@ Render an object (or array of objects) to a one-time-use template:
 
     var one-time-template = "<span>{{ title }}: {{ content }}</span>";
     $.tempest(one-time-template, {
-        "title": "Example", 
+        "title": "Example",
         "content": "Hello World!",
     });
     // returns jQuery: [ <span>Example: Hello World!</span> ]
@@ -172,13 +172,13 @@ Write your own template tags
 
 All tags are stored in $.tempest.tags. Tags have a couple things to work with:
 
-The "args" property is set before render: 
-    
+The "args" property is set before render:
+
     {% tag_type arg1 arg2 foo bar %}
 
-The "args" property would be set to 
+The "args" property would be set to
 
-    ["arg1", "arg2", "foo", "bar"] 
+    ["arg1", "arg2", "foo", "bar"]
 
 in this example. The tag's render method could look them up in the context
 object, or could do whatever it wanted to do with it.
