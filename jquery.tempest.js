@@ -218,7 +218,7 @@
     function cleanVal(val) {
         if (val instanceof $) {
             return jQueryToString(val);
-        } else if (!isArray(val) && typeof(val) === "object") {
+        } else if (val !== null && !isArray(val) && typeof(val) === "object") {
             if (typeof(val.toHTML) === "function") {
                 return cleanVal(val.toHTML());
             } else {
