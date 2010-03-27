@@ -184,18 +184,16 @@ test("If an object is passed as a variable, render it with the toHTML method if 
      });
 
 
-test("If statements that are evaluated to true are working as expected",
-     1,
+test("If statements",
+     2,
      function () {
          var obj = { t:true };
-         ok($.tempest("if-template", obj).text() === "hello world");
-     });
+         ok($.tempest("if-template", obj).text() === "hello world",
+            "When true");
 
-test("If statements that are evaluated to false are working as expected",
-     1,
-     function () {
-         var obj = { t:false };
-         ok($.tempest("if-template", obj).text() === "hello ");
+         obj = { t:false };
+         ok($.tempest("if-template", obj).text() === "hello ",
+            "When false");
      });
 
 test("Testing extension of tag object with custom tags.",
