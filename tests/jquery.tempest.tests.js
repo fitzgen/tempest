@@ -226,7 +226,36 @@ test("Test for tag is working correctly.",
          ).children().length === context.people.length);
      });
 
-// TODO: DOM Manipulation tests
+test("Test that the dom manipulation is working correctly",
+     4,
+     function () {
+         var el = $("<ul/>");
+
+         el.tempest("append", "template-message", {
+             name: "foo",
+             message: "bar"
+         });
+         ok(el.children().length === 1);
+
+         el.tempest("prepend", "template-message", {
+             name: "foo",
+             message: "bar"
+         });
+         ok(el.children().length === 2);
+
+         el.children().first().tempest("after", "template-message", {
+             name: "foo",
+             message: "bar"
+         });
+         ok(el.children().length === 3);
+
+         // Equivalent to el.tempest("html", "template-message", ...)
+         el.tempest("template-message", {
+             name: "foo",
+             message: "bar"
+         });
+         ok(el.children().length === 1);
+     });
 
 module("Private functions");
 
