@@ -150,26 +150,24 @@ test("If a template's variable is not passed, default that variable to \"\"",
          ok($.tempest(tmpl, obj).text() === "");
      });
 
-test("Access a passed object's attributes",
-     1,
+test("Dot notation attribute lookup",
+     2,
      function () {
          var obj = {
              obj: { name:"object", type: { attr: "attribute" } }
          };
          var tmpl = "<p>{{ obj.name }} {{ obj.type.attr }}</p>";
          var rendered = $.tempest(tmpl, obj);
-         ok(rendered.text() === "object attribute");
-     });
+         ok(rendered.text() === "object attribute",
+            "Works nested once and twice deep");
 
-test("The dot notation/attr look up works with different values but same template.",
-     1,
-     function () {
-         var tmpl = "My site is: {{ site.name }}";
-         var rendered = $.tempest(tmpl, {"site": {"name":"my site"}});
+         tmpl = "My site is: {{ site.name }}";
+         rendered = $.tempest(tmpl, {"site": {"name":"my site"}});
          var first = rendered === "My site is: my site";
          rendered = $.tempest(tmpl, {"site": {"name":"your site"}});
          var second = rendered === "My site is: your site";
-         ok(first && second);
+         ok(first && second,
+            "The dot notation/attr look up works with different values but same template. (regression test)");
      });
 
 test("If an object is passed as a variable, render it with the toHTML method if it exists.",
