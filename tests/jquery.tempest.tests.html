@@ -11,7 +11,7 @@
             <li>{{name}} is a {{type}} at {{url}}</li>
         </textarea>
         <textarea class="tempest-template" title="if-template" style="display:none;">
-            <li>hello {% if t %}world{% endif %}</li>
+            <li>hello {% if t %}world{% endif %}{% if foo.bar %}!{% endif %}</li>
         </textarea>
         <textarea class="tempest-template" title="for-template" style="display:none;">
             {% for person in people %}

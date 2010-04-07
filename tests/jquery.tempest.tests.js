@@ -183,7 +183,7 @@ test("If an object is passed as a variable, render it with the toHTML method if 
 
 
 test("If statements",
-     2,
+     4,
      function () {
          var obj = { t:true };
          ok($.tempest("if-template", obj).text() === "hello world",
@@ -192,6 +192,17 @@ test("If statements",
          obj = { t:false };
          ok($.tempest("if-template", obj).text() === "hello ",
             "When false");
+
+         obj.foo = {}
+         obj.foo.bar = true;
+         ok($.tempest("if-template", obj).text() === "hello !",
+            "When false");
+   
+         obj.foo = {}
+         obj.foo.bar = false;
+         ok($.tempest("if-template", obj).text() === "hello ",
+            "When false");
+
      });
 
 test("Testing extension of tag object with custom tags.",
@@ -359,7 +370,7 @@ test("chooseTemplate recognizes stored templates",
      1,
      function () {
          ok($.tempest._test.chooseTemplate("if-template") ===
-             "<li>hello {% if t %}world{% endif %}</li>");
+             "<li>hello {% if t %}world{% endif %}{% if foo.bar %}!{% endif %}</li>");
      });
 
 test("chooseTemplate returns unrecognized template keys as one-time-use templates.",

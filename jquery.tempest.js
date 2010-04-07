@@ -108,7 +108,7 @@
                         subNodes = this.subNodes;
 
                     // Check the truthiness of the argument.
-                    if (!!context[this.args[0]]) {
+                    if (!!getValFromObj(this.args[0],context)) {
                         $.each(subNodes, function (i, node) {
                             rendered_nodes.push(node.render(context));
                         });
