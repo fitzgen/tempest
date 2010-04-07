@@ -193,15 +193,17 @@ test("If statements",
          ok($.tempest("if-template", obj).text() === "hello ",
             "When false");
 
-         obj.foo = {}
-         obj.foo.bar = true;
+         obj = {
+             foo: { bar: true }
+         };
          ok($.tempest("if-template", obj).text() === "hello !",
-            "When false");
+            "When attribute true");
    
-         obj.foo = {}
-         obj.foo.bar = false;
+         obj = {
+             foo: { bar: false }
+         };
          ok($.tempest("if-template", obj).text() === "hello ",
-            "When false");
+            "When attribute false");
 
      });
 
