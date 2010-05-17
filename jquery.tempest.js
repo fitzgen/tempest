@@ -68,7 +68,7 @@
         BLOCK_NODES = {
             "for": {
                 expectsEndTag: true,
-                render: function (context) {
+                render: function renderFor(context) {
                     var args = this.args,
                     subNodes = this.subNodes,
                     renderedNodes = [],
@@ -85,7 +85,7 @@
                             tmpObj._index = i;
                             forContext = $.extend(true, {}, context, tmpObj);
 
-                            $.each(subNodes, function (j, node) {
+                            $.each(subNodes, function renderSubNodes(j, node) {
                                 renderedNodes.push(
                                     node.render(forContext)
                                 );
@@ -103,7 +103,7 @@
             },
             "if": {
                 expectsEndTag: true,
-                render: function (context) {
+                render: function renderIf(context) {
                     var rendered_nodes = [],
                         subNodes = this.subNodes;
 
@@ -157,13 +157,13 @@
     // so we must accomodate them.
     var split = (function () {
         if ("abc".split(/(b)/).length === 3) {
-            return function (str, delimiter) {
+            return function split(str, delimiter) {
                 return String.prototype
                              .split
                              .call(str, delimiter);
             };
         } else {
-            return function (str, delimiter) {
+            return function split(str, delimiter) {
                 if (Object.prototype
                           .toString
                           .call(delimiter) === "[object RegExp]") {
@@ -445,7 +445,7 @@
             }
 
             // Render each node and push it to the lines.
-            $.each(nodes, function (i, node) {
+            $.each(nodes, function accumulateRendered(i, node) {
                 lines.push(node.render(obj));
             });
         });
