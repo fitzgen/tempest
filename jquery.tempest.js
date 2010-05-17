@@ -84,7 +84,7 @@
                             tmpObj = {};
                             tmpObj[itemName] = arr[i];
                             tmpObj._index = i;
-                            forContext = $.extend(true, {}, context, tmpObj);
+                            forContext = $.extend({}, context, tmpObj);
 
                             $.each(subNodes, function renderSubNodes(j, node) {
                                 renderedNodes.push(
