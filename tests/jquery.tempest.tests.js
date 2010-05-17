@@ -533,11 +533,9 @@ asyncTest("Profile rendering speed.",
                           counts[deltas[i]] + 1;
                   }
                   var mode = deltas[0];
-                  console.log(mode);
                   for (var time in counts)
                       if (counts.hasOwnProperty(time) && counts[time] > counts[mode])
                           mode = time;
-                  console.log(mode);
 
                   // Standard deviation.
                   var diffs = [];
