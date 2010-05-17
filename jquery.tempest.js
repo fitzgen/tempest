@@ -71,6 +71,7 @@
                 render: function renderFor(context) {
                     var args = this.args,
                     subNodes = this.subNodes,
+                    subNodesLen = subNodes.length,
                     renderedNodes = [],
                     i, itemName, arrName, arr, arrLength, forContext, tmpObj;
 
@@ -86,11 +87,9 @@
                             tmpObj._index = i;
                             forContext = $.extend({}, context, tmpObj);
 
-                            $.each(subNodes, function renderSubNodes(j, node) {
-                                renderedNodes.push(
-                                    node.render(forContext)
-                                );
-                            });
+                            for (j = 0; j < subNodesLen; j++) {
+                                renderedNodes.push(subNodes[j].render(forContext));
+                            }
                         }
 
                         return renderedNodes.join("");
