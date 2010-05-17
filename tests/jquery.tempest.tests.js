@@ -499,62 +499,88 @@ test("strip removes whitespace from front and back",
          ok($.tempest._test.strip("  hello world   ") === "hello world");
      });
 
+module("Speed tests");
 
-// // speed monitoring ========================================================================
+asyncTest("Profile rendering speed.",
+          6,
+          function () {
+              var deltas = [];
+              var count = 0;
 
-// // see how long it takes to render 100 templates 20 times
-// var deltas = [];
-// var count = 0;
-// $("body ul:last").after("<h3>Rendering a template 1000 times:</h3><ul></ul><p></p>");
+              var calcSpeedStats = function () {
+                  console.profileEnd();
 
-// setTimeout(function () {
-//                // show a little something so we know that the tests haven't stalled
-//                var last_p = $("p:last");
-//                last_p.html(last_p.html()+". ");
+                  // Mean average.
+                  var total = 0;
+                  for (var i = 0; i < deltas.length; i++) {
+                      total += deltas[i];
+                  }
+                  var mean = total / deltas.length;
 
-//                if (count < 1000) {
-//                    var start = new Date().getTime();
-//                    $.tempest("<li><em>Whoah a one time use {% if t %}{{thing}}{% endif %}!</em></li>", {
-//                                  thing: "test",
-//                                  t: true
-//                              });
-//                    var end = new Date().getTime();
-//                    var delta = end - start;
-//                    deltas.push(delta);
+                  // Median
+                  var sortedDeltas = deltas.slice(0).sort(function (a,b) {
+                      if (a > b)      return 1;
+                      else if (a < b) return -1;
+                      else            return 0;
+                  });
+                  var median = sortedDeltas[ Math.floor( sortedDeltas.length/2 ) ];
 
-//                    // recur
-//                    count++;
-//                    return setTimeout(arguments.callee, 1);
-//                } else {
-//                    return calcSpeedStats();
-//                }
-//            }, 1);
+                  // Mode
+                  var counts = {};
+                  for (i = 0; i < deltas.length; i++) {
+                      counts[deltas[i]] = counts[deltas[i]] === undefined ?
+                          1 :
+                          counts[deltas[i]] + 1;
+                  }
+                  var mode = deltas[0];
+                  console.log(mode);
+                  for (var time in counts)
+                      if (counts.hasOwnProperty(time) && counts[time] > counts[mode])
+                          mode = time;
+                  console.log(mode);
 
-// function calcSpeedStats() {
-//     $("p:last").hide();
-//     // avg (mean)
-//     var total = 0;
-//     for (i = 0; i < deltas.length; i++) {
-//         total += deltas[i];
-//             }
-//             var avg = total / deltas.length;
+                  // Standard deviation.
+                  var diffs = [];
+                  for (i = 0; i < deltas.length; i++) {
+                      diffs[i] = (deltas[i] - mean) * (deltas[i] - mean);
+                  }
+                  var stdDevTotal = 0;
+                  for (i = 0; i < diffs.length; i++) {
+                      stdDevTotal += diffs[i];
+                  }
+                  var stdDev = Math.sqrt(stdDevTotal / diffs.length);
 
-//             // std deviation
-//             var diffs = [];
-//             for (i = 0; i < deltas.length; i++) {
-//             diffs[i] = (deltas[i] - avg) * (deltas[i] - avg);
-//     }
-//     var stdDevTotal = 0;
-//     for (i = 0; i < diffs.length; i++) {
-//         stdDevTotal += diffs[i];
-//             }
-//             var stdDev = Math.sqrt(stdDevTotal / diffs.length);
+                  var max = Math.max.apply(Math, deltas);
+                  var min = Math.min.apply(Math, deltas);
 
-//             var max = Math.max.apply(Math, deltas);
-//             var min = Math.min.apply(Math, deltas);
+                  ok(true, "Mean: " + mean + " ms");
+                  ok(true, "Median: " + median + " ms");
+                  ok(true, "Mode: " + mode + " ms");
+                  ok(true, "Standard deviation: " + stdDev + " ms");
+                  ok(true, "Max: " + max + " ms");
+                  ok(true, "Min: " + min + " ms");
 
-//             $("body ul:last").append("<li>The avg. time was "+avg+" ms</li>");
-//             $("body ul:last").append("<li>The standard deviation was "+stdDev+" ms</li>");
-//             $("body ul:last").append("<li>The max time was "+max+" ms</li>");
-//             $("body ul:last").append("<li>The min time was "+min+" ms</li>");
-//     }
+                  start();
+              };
+
+              console.profile();
+
+              setTimeout(function () {
+                  var start, end;
+                  if (count < 500) {
+                      start = +new Date;
+                      $.tempest("<li>{% for i in arr %}<em>Whoah a one time use {% if t %}{{ thing }}{% endif %}!</em>{% endfor %}</li>", {
+                          thing: "test",
+                          t: true,
+                          arr: [0,1,2,3,4,5,6,7,8,9]
+                      });
+                      end = +new Date;
+                      deltas.push(end - start);
+
+                      count++;
+                      return setTimeout(arguments.callee, 1);
+                  } else {
+                      return calcSpeedStats();
+                  }
+              }, 15);
+          });
