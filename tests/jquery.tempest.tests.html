@@ -18,6 +18,11 @@
                 <li>{{ person.name }}</li>
             {% endfor %}
         </textarea>
+        <textarea class="tempest-template" title="nested-for-template" style="display:none;">
+            {% for person in the.people %}
+                <li>{{ person.name }}</li>
+            {% endfor %}
+        </textarea>
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
         <script type="text/javascript" src="qunit.js"></script>

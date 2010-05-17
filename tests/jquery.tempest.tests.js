@@ -11,7 +11,7 @@ test("Access stored templates that were inside textareas",
 test("Length of $.tempest() is equal to number of textarea templates pre-defined",
      1,
     function () {
-        ok($.tempest().length == 4);
+        ok($.tempest().length == 5);
     });
 
 test("Keys to existing templates are in $.tempest()",
@@ -222,7 +222,7 @@ test("Testing extension of tag object with custom tags.",
      });
 
 test("Test for tag is working correctly.",
-     1,
+     2,
      function () {
          var context = {
              people: [{name: "Nick"}, {name: "Dave"}, {name: "John"}]
@@ -233,6 +233,17 @@ test("Test for tag is working correctly.",
          ok($("<ul>").append(
              $.tempest("for-template", context)
          ).children().length === context.people.length);
+
+         context = {
+             the: { people: [{name: "Nick"}, {name: "Dave"}, {name: "John"}] }
+         };
+
+         // Append to <ul> because sometimes text nodes get up in there and mess
+         // up the count of html nodes rendered.
+         ok($("<ul>").append(
+             $.tempest("nested-for-template", context)
+         ).children().length === context.the.people.length);
+
      });
 
 test("Test that the dom manipulation is working correctly",
