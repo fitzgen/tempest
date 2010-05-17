@@ -72,14 +72,15 @@
                     var args = this.args,
                     subNodes = this.subNodes,
                     renderedNodes = [],
-                    i, itemName, arrName, arr, forContext, tmpObj;
+                    i, itemName, arrName, arr, arrLength, forContext, tmpObj;
 
                     if (args.length === 3 && args[1] === "in") {
                         itemName = args[0];
                         arrName = args[2];
                         arr = getValFromObj(arrName, context);
+                        arrLength = arr.length;
 
-                        for (i = 0; i < arr.length; i++) {
+                        for (i = 0; i < arrLength; i++) {
                             tmpObj = {};
                             tmpObj[itemName] = arr[i];
                             tmpObj._index = i;
