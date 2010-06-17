@@ -41,22 +41,22 @@ Tempest jQuery Templating Plugin 0.2
 Backwards incompatibilities
 -------------------------------------------------------------------------------
 
-* <textarea> templates are indexed by the "title" attribute as their key, 
-  rather than the "id" attribute. I realized I was prepending "template-" on to 
-  all of the id's to avoid a namespace collision and it was making the code 
+* <textarea> templates are indexed by the "title" attribute as their key,
+  rather than the "id" attribute. I realized I was prepending "template-" on to
+  all of the id's to avoid a namespace collision and it was making the code
   more verbose. I value brevity in my code.
 
 New features
 -------------------------------------------------------------------------------
 
-* Access objects' children and attributes with the dot notation. So 
+* Access objects' children and attributes with the dot notation. So
   "{{ obj.child.attr }}" is completely legit.
 
-* If "{{ object }}" is any object besides a jQuery instance (see the bug fixes 
-  below), Tempest will try calling a "toHTML()" method if it exists. If not, it 
+* If "{{ object }}" is any object besides a jQuery instance (see the bug fixes
+  below), Tempest will try calling a "toHTML()" method if it exists. If not, it
   will default to the "toString()" method.
 
-* Calling "$.tempest()" without any parameters will return an array of all the 
+* Calling "$.tempest()" without any parameters will return an array of all the
   key/template pairs that Tempest has stored right now
 
 Bug fixes
