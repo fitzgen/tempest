@@ -277,6 +277,26 @@ test("Test that the dom manipulation is working correctly",
          ok(el.children().length === 1);
      });
 
+test("getContextValue can access children/attributes.",
+     1,
+     function () {
+         ok($.tempest.getContextValue("obj.child", {
+             obj: {
+                 child: "hello"
+             }
+         }) === "hello");
+     });
+
+test("getContextValue returns an empty string if the attribute is not found.",
+     1,
+     function () {
+         ok($.tempest.getContextValue("obj.fake", {
+             obj: {
+                 child: "hello"
+             }
+         }) === "");
+     });
+
 module("Private functions");
 
 test("isBlockTag recognizes block tags.",
@@ -341,26 +361,6 @@ test("cleanVal leaves all other input alone.",
      1,
      function () {
          ok($.tempest._test.cleanVal("hello") === "hello");
-     });
-
-test("getValFromObj can access children/attributes.",
-     1,
-     function () {
-         ok($.tempest._test.getValFromObj("obj.child", {
-             obj: {
-                 child: "hello"
-             }
-         }) === "hello");
-     });
-
-test("getValFromObj returns an empty string if the attribute is not found.",
-     1,
-     function () {
-         ok($.tempest._test.getValFromObj("obj.fake", {
-             obj: {
-                 child: "hello"
-             }
-         }) === "");
      });
 
 test("jQueryToString works correctly",

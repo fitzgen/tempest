@@ -199,16 +199,20 @@ it before printing them:
             var rendered = [];
             for (var i = 0; i < this.args.length; i++) {
                 rendered.push(
-                    context[this.args[i]].replace(/shit/gi, "#!$%")
+                    $.tempest.getContextValue(this.args[i], context).replace(/shit/gi, "#!$%")
                 );
             }
             return rendered.join(" ");
         }
     };
 
-    var template = "<p>No profanity here: {% filter bad_word %}</p>";
-    $.tempest(template, { bad_word: "shit" });
+    var template = "<p>No profanity here: {% filter badWord %}</p>";
+    $.tempest(template, { badWord: "shit" });
     // returns jQuery: [ <p>No profanity here: #!$%</p> ]
+
+Since arguments are passed in as strings, if you want to get the context value
+assocciated with the argument "object.foo.bar", you must call
+`$.tempest.getContextValue(arg, context)`.
 
 For another reference, see the implementation of the if tag here:
 http://github.com/fitzgen/tempest/blob/master/jquery.tempest.js#L69

@@ -78,7 +78,7 @@
                     if (args.length === 3 && args[1] === "in") {
                         itemName = args[0];
                         arrName = args[2];
-                        arr = getValFromObj(arrName, context);
+                        arr = getContextValue(arrName, context);
                         arrLength = arr.length;
 
                         for (i = 0; i < arrLength; i++) {
@@ -108,7 +108,7 @@
                         subNodes = this.subNodes;
 
                     // Check the truthiness of the argument.
-                    if (!!getValFromObj(this.args[0], context)) {
+                    if (!!getContextValue(this.args[0], context)) {
                         $.each(subNodes, function (i, node) {
                             rendered_nodes.push(node.render(context));
                         });
@@ -133,7 +133,7 @@
                     "" :
                     context[this.name];
                 if (val === "" && this.name.search(/\./) !== -1) {
-                    return getValFromObj(this.name, context);
+                    return getContextValue(this.name, context);
                 }
                 return cleanVal(val);
             }
@@ -146,7 +146,6 @@
             return new TemplateSyntaxError(message);
         }
         this.message = message;
-        return this;
     }
     TemplateSyntaxError.prototype = new SyntaxError();
     TemplateSyntaxError.prototype.name = "TemplateSyntaxError";
@@ -229,11 +228,11 @@
         }
     }
 
-    // Traverse a path of an obj from a string representation,
+    // Traverse a path of a context object from a string representation,
     // for example "object.child.attr".
-    function getValFromObj(str, obj) {
+    function getContextValue(str, context) {
         var path = split(str, "."),
-            val = obj[path[0]],
+            val = context[path[0]],
             i;
         for (i = 1; i < path.length; i++) {
             // Return an empty string if the lookup ever hits undefined.
@@ -537,8 +536,10 @@
         return this.each(f);
     };
 
-    // EXPOSE BLOCK_NODES OBJECT TO ALLOW EXTENSION WITH CUSTOM TAGS
+    // EXPOSE API TO ALLOW EXTENSION WITH CUSTOM TAGS
     $.tempest.tags = BLOCK_NODES;
+    $.tempest.getContextValue = getContextValue;
+    $.tempest.TemplateSyntaxError = TemplateSyntaxError;
 
     // EXPOSE PRIVATE FUNCTIONS FOR TESTING
     if (window.testTempestPrivates === true) {
@@ -553,7 +554,6 @@
         a("isEndTag", isEndTag);
         a("isVarTag", isVarTag);
         a("cleanVal", cleanVal);
-        a("getValFromObj", getValFromObj);
         a("jQueryToString", jQueryToString);
         a("makeObj", makeObj);
         a("storedTemplates", storedTemplates);
