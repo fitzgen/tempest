@@ -1,7 +1,7 @@
 // Tempest jQuery Templating Plugin
 // ================================
 //
-// Copyright (c) 2009 Nick Fitzgerald - http://fitzgeraldnick.com/
+// Copyright (c) 2009, 2010 Nick Fitzgerald - http://fitzgeraldnick.com/
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
