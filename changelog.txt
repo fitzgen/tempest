@@ -1,4 +1,17 @@
 ===============================================================================
+Tempest jQuery Templating Plugin 0.3.2
+===============================================================================
+
+* Expose `$.tempest.getContextValue(argString, context)` for use in custom tags
+
+* Expose `$.tempest.TemplateSyntaxError` for use in custom tags, and also for
+  catching exceptions.
+
+* Now using the Closure Compiler, so the minifications are much smaller. Anyone
+  running 0.3.1 minified is reccomended to start using 0.3.2 minified since it
+  has such a smaller footprint.
+
+===============================================================================
 Tempest jQuery Templating Plugin 0.3.1
 ===============================================================================
 
