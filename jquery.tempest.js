@@ -507,33 +507,27 @@
     // Extend jQuery("selector").tempest using the existing jQuery.tempest API.
     $.fn.tempest = function() {
         var args = Array.prototype.slice.call(arguments, 0);
-        var f = null;
 
-        if (args.length == 2 &&
-            typeof args[0] == "string" &&
-            typeof args[1] == "object") {
+        if (args.length === 2 &&
+            typeof args[0] === "string" &&
+            typeof args[1] === "object") {
             // Inserts the result of rendering the specified template on the
             // specified data into the set of matched elements.
-            f = function () {
-                $(this).html($.tempest(args[0], args[1]));
-            };
-        } else if (args.length == 3 &&
-                   typeof args[0] == "string" &&
-                   typeof args[1] == "string" &&
-                   typeof args[2] == "object") {
+            return $(this).html($.tempest(args[0], args[1]));
+        } else if (args.length === 3 &&
+                   typeof args[0] === "string" &&
+                   typeof this[args[0]] === "function" &&
+                   typeof args[1] === "string" &&
+                   typeof args[2] === "object") {
             // Calls the appropriate jQuery function, passing it the result of
             // rendering the given template on the data provided.
-            f = function () {
-                $(this)[args[0]]($.tempest(args[1], args[2]));
-            };
+            return $(this)[args[0]]($.tempest(args[1], args[2]));
         } else {
             throw new TypeError([
                 "jQuery(selector).tempest was passed the wrong number or type",
                 "of arguments. Received " + args
             ].join(" "));
         }
-
-        return this.each(f);
     };
 
     // EXPOSE API TO ALLOW EXTENSION WITH CUSTOM TAGS
