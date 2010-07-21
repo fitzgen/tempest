@@ -23,6 +23,14 @@
                 <li>{{ person.name }}</li>
             {% endfor %}
         </textarea>
+        <textarea class="tempest-template" title="issue-12" style="display:none;">
+          {% for paragraph in paragraphs %}
+              {{ paragraph.title }}
+              {% for image in paragraph.images %}
+                  {{ image.src }} {{ image.alt }}
+              {% endfor %}
+          {% endfor %}
+        </textarea>
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
         <script type="text/javascript" src="qunit.js"></script>

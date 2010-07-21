@@ -11,7 +11,7 @@ test("Access stored templates that were inside textareas",
 test("Length of $.tempest() is equal to number of textarea templates pre-defined",
      1,
     function () {
-        ok($.tempest().length == 5);
+        ok($.tempest().length == 6);
     });
 
 test("Keys to existing templates are in $.tempest()",
@@ -516,6 +516,43 @@ test("strip removes whitespace from front and back",
      1,
      function () {
          ok($.tempest._test.strip("  hello world   ") === "hello world");
+     });
+
+module("Regression Tests");
+
+test("Issue #12",
+     function () {
+         var data = {
+             "email": "contact@roelkramer.nl",
+             "name": "Roel Kramer",
+             "subject": "blaat",
+             "footer": "footer blah blah",
+             "paragraphs": [{
+                 "title": "test paragraph title 1",
+                 "body": "test paragraph body 1",
+                 "images": [
+                     {"src": "http 1", "alt": "img alt"},
+                     {"src": "http 2", "alt": "img alt"},
+                     {"src": "http 3", "alt": "img alt"}
+                 ]
+             }, {
+                 "title": "test paragraph title 2",
+                 "body": "test paragraph body 2",
+                 "images": [
+                     {"src": "http 1", "alt": "img alt"},
+                     {"src": "http 2", "alt": "img alt"}
+                 ]
+             }, {
+                 "title": "test paragraph title 3",
+                 "body": "test paragraph body 3",
+                 "images": [
+                     {"src": "http 1", "alt": "img alt"},
+                     {"src": "http 2", "alt": "img alt"}
+                 ]
+             }]
+         };
+         var result = $.tempest("issue-12", data);
+         ok(result !== "", result);
      });
 
 module("Speed tests");
