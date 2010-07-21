@@ -198,7 +198,7 @@ test("If statements",
          };
          ok($.tempest("if-template", obj).text() === "hello !",
             "When attribute true");
-   
+
          obj = {
              foo: { bar: false }
          };
@@ -222,7 +222,7 @@ test("Testing extension of tag object with custom tags.",
      });
 
 test("Test for tag is working correctly.",
-     2,
+     3,
      function () {
          var context = {
              people: [{name: "Nick"}, {name: "Dave"}, {name: "John"}]
@@ -243,6 +243,14 @@ test("Test for tag is working correctly.",
          ok($("<ul>").append(
              $.tempest("nested-for-template", context)
          ).children().length === context.the.people.length);
+
+         context = { posts: [ { comments: [1,2,3] },
+                              { comments: [4,5,6] },
+                              { comments: [7,8,9] } ] };
+
+         var templ = "{% for p in posts %}{% for i in p.comments %}{{ i }}{% endfor %}{% endfor %}";
+         ok($.tempest(templ, context) === "123456789",
+            "For loops within for loops, work correctly.");
 
      });
 
