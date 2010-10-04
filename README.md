@@ -1,3 +1,10 @@
+THIS PROJECT IS DEPRECATED
+==========================
+
+JQuery now has an officially sanctioned templating engine: http://blog.jquery.com/2010/10/04/new-official-jquery-plugins-provide-templating-data-linking-and-globalization/
+
+Development on this project has now ceased.
+
 Tempest jQuery Templating Plugin
 ================================
 
